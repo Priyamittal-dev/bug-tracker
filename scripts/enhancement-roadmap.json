@@ -1,0 +1,27 @@
+[
+  {
+    "id": "enhancement-001",
+    "title": "Add Issue Priority Score Calculator Utility",
+    "description": "Create a utility function in src/lib/priority-calculator.ts that calculates priority weight based on severity (CRITICAL, HIGH, MEDIUM, LOW) and urgency. Add unit test in tests/unit/priority-calculator.test.ts.",
+    "status": "completed",
+    "lastRun": "2026-10-04T19:26:24.720Z"
+  },
+  {
+    "id": "enhancement-002",
+    "title": "Add Issue Export to JSON/CSV Formatter",
+    "description": "Create a data export helper in src/lib/export-formatter.ts to export issues with their tags, assignees, and timestamps cleanly formatted. Add unit tests in tests/unit/export-formatter.test.ts.",
+    "status": "pending"
+  },
+  {
+    "id": "enhancement-003",
+    "title": "Add SLA Breach Warning Buffer Helper",
+    "description": "Add a helper function in src/lib/sla-warning.ts that flags issues approaching within 15% of SLA deadline. Add comprehensive unit tests in tests/unit/sla-warning.test.ts.",
+    "status": "pending"
+  },
+  {
+    "id": "enhancement-004",
+    "title": "Add Markdown Comment Sanitizer & Parser Helper",
+    "description": "Add a comment text helper in src/lib/comment-sanitizer.ts to detect and sanitize XSS or malicious tags in comment markdown. Add unit tests in tests/unit/comment-sanitizer.test.ts.",
+    "status": "pending"
+  }
+]

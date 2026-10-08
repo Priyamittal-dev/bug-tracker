@@ -1,0 +1,68 @@
+name: Daily Autonomous Product Enhancement & Regression Testing
+
+on:
+  schedule:
+    # Runs every day at 02:00 UTC (runs in the GitHub Cloud even when laptop is turned off)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allows 1-click manual trigger from GitHub Actions UI anytime
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autonomous-enhance:
+    name: Enhance Product & Verify Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: ?? Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ?? Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: ?? Install Dependencies
+        run: npm install
+
+      - name: ??? Generate Database Client (Prisma)
+        run: npx prisma generate
+
+      - name: ?? Baseline Health Check (Full Test Suite)
+        run: npx vitest run
+
+      - name: ? Run Autonomous Daily Enhancement Engine
+        run: node scripts/daily-enhancer.js
+
+      - name: ??? Strict Regression Test Gate (100% Pass Required)
+        run: npx vitest run
+
+      - name: ?? Append Step Summary Report
+        if: always()
+        run: |
+          echo "## ?? Daily Autonomous Enhancement Report" >> 
+          if [ -f DAILY_ENHANCEMENT_LOG.md ]; then
+            tail -n 35 DAILY_ENHANCEMENT_LOG.md >> 
+          else
+            echo "No changes logged." >> 
+          fi
+
+      - name: ?? Commit and Push Verified Enhancement to Main
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git status
+          if [ -n "?? DAILY_ENHANCEMENT_LOG.md" ]; then
+            git add .
+            git commit -m "feat(auto-enhance): autonomous daily enhancement verified with 100% test pass [skip ci]"
+            git push origin main
+          else
+            echo "No new uncommitted changes to push."
+          fi
