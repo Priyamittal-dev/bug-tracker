@@ -12,7 +12,7 @@ if (googleId && googleSecret && !googleId.includes("your-")) {
     Google({
       clientId: googleId,
       clientSecret: googleSecret,
-      checks: ["state"],
+      checks: ["none"],
       allowDangerousEmailAccountLinking: true,
     })
   );
