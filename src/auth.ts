@@ -6,10 +6,11 @@ import bcrypt from "bcryptjs";
 import authConfig from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
+  ...authConfig, trustHost: true, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback-secret-key-production-32chars",
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   providers: [
+    ...authConfig.providers,
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },

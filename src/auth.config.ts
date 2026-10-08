@@ -16,7 +16,7 @@ export default {
     GitHub({
       clientId: process.env.GITHUB_ID || process.env.AUTH_GITHUB_ID || "",
       clientSecret:
-        process.env.GITHUB_SECRET || process.env.AUTH_GITHUB_SECRET || "",
+        process.env.GITHUB_SECRET || process.env.AUTH_GITHUB_SECRET || "", 
     }),
     Credentials({
       credentials: {
