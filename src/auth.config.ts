@@ -12,6 +12,8 @@ if (googleId && googleSecret && !googleId.includes("your-")) {
     Google({
       clientId: googleId,
       clientSecret: googleSecret,
+      checks: ["state"],
+      allowDangerousEmailAccountLinking: true,
     })
   );
 }
