@@ -115,8 +115,8 @@ export const openApiSpec: OpenApiSpec = {
         type: "object",
         properties: {
           id: { type: "string", example: "usr_cmv2gp6hd0000" },
-          name: { type: "string", example: "Rahul Garg" },
-          email: { type: "string", format: "email", example: "rahul@bugtracker.io" },
+          name: { type: "string", example: "Priyanka Devi" },
+          email: { type: "string", format: "email", example: "priyanka@bugtracker.io" },
           avatar: { type: "string", example: "https://images.unsplash.com/photo-1534528741775" },
           jobTitle: { type: "string", example: "Lead Architect & Engineer" },
           status: { type: "string", enum: ["ACTIVE", "SUSPENDED", "PENDING"], example: "ACTIVE" },
@@ -242,7 +242,7 @@ export const openApiSpec: OpenApiSpec = {
                 type: "object",
                 required: ["email", "password"],
                 properties: {
-                  email: { type: "string", format: "email", example: "rahul@bugtracker.io" },
+                  email: { type: "string", format: "email", example: "priyanka@bugtracker.io" },
                   password: { type: "string", format: "password", example: "password123" },
                 },
               },

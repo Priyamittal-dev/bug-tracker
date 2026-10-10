@@ -38,18 +38,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         // Resilience: auto-seed demo accounts on demand if database was freshly initialized
-        if (!user && (email === "rahul@bugtracker.io" || email === "sarah.chen@bugtracker.io")) {
+        if (!user && (email === "priyanka@bugtracker.io" || email === "priya@bugtracker.io" || email === "rahul@bugtracker.io" || email === "sarah.chen@bugtracker.io")) {
           try {
             const hashedPassword = await bcrypt.hash("password123", 10);
-            const isRahul = email === "rahul@bugtracker.io";
+            let name = "Priyanka Devi";
+            let jobTitle = "Principal Systems Architect & Founder";
+            if (email === "rahul@bugtracker.io") {
+              name = "Rahul Garg";
+            } else if (email === "sarah.chen@bugtracker.io") {
+              name = "Sarah Chen";
+              jobTitle = "Lead QA Automation Engineer";
+            }
             user = await prisma.user.upsert({
               where: { email },
               update: { password: hashedPassword },
               create: {
-                name: isRahul ? "Rahul Garg" : "Sarah Chen",
+                name,
                 email,
                 password: hashedPassword,
-                jobTitle: isRahul ? "Principal Systems Architect & Founder" : "Lead QA Automation Engineer",
+                jobTitle,
                 status: "ACTIVE",
               },
             });

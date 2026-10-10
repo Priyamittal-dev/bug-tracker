@@ -51,7 +51,7 @@ export function IntegrationsView() {
               title: "WebSocket session memory leak",
               old_status: "OPEN",
               new_status: "IN_PROGRESS",
-              assignee: "Rahul Garg",
+              assignee: "Priyanka Devi",
               severity: "CRITICAL",
             },
             zoho_sync: "SUCCESS (HTTP 200)",
@@ -241,7 +241,7 @@ export function IntegrationsView() {
               <div className="flex justify-between text-muted-foreground">
                 <span>Repository:</span>
                 <strong className="text-foreground">
-                  rahulgarg55/bug-tracker
+                  Priyamittal-dev/bug-tracker
                 </strong>
               </div>
               <div className="flex justify-between text-muted-foreground">

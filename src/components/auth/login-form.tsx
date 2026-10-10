@@ -125,7 +125,7 @@ export function LoginForm() {
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
             type="button"
-            onClick={() => handleQuickFill("rahul@bugtracker.io", "admin")}
+            onClick={() => handleQuickFill("priyanka@bugtracker.io", "admin")}
             className="text-left p-2 rounded-lg text-xs border transition-all"
           >
             <div className="font-medium text-foreground flex items-center justify-between">
@@ -135,7 +135,7 @@ export function LoginForm() {
               )}
             </div>
             <div className="text-[10px] text-muted-foreground truncate">
-              rahul@bugtracker.io
+              priyanka@bugtracker.io
             </div>
           </button>
 
