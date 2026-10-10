@@ -2,10 +2,19 @@
   "name": "bug-tracker",
   "version": "0.1.0",
   "private": true,
-  "author": "Priyanka Devi",
+  "authors": [
+    {
+      "name": "Rahul Garg",
+      "url": "https://github.com/rahulgarg55"
+    },
+    {
+      "name": "Priyanka Devi",
+      "url": "https://github.com/Priyamittal-dev"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Priyamittal-dev/bug-tracker.git"
+    "url": "https://github.com/rahulgarg55/bug-tracker.git"
   },
   "scripts": {
     "dev": "next dev",

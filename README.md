@@ -1,7 +1,7 @@
 # Enterprise BugTracker & Engineering Management SaaS
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Priyamittal-dev/bug-tracker)
+[![Deploy Rahul's Repo with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/rahulgarg55/bug-tracker)
+[![Deploy Priyanka's Repo with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)
 ![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-16.3-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
@@ -26,8 +26,8 @@ Inspired by Jira, Linear, and Zoho BugTracker.
 
 ### Option 1: Deploy with Vercel (Fastest & Recommended)
 Deploy instantly to Vercel's global edge network:
-1. Click **[Deploy with Vercel](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)**.
-2. Connect your GitHub account and select repository `Priyamittal-dev/bug-tracker`.
+1. Click **[Deploy Rahul's Repository (rahulgarg55/bug-tracker)](https://vercel.com/new/clone?repository-url=https://github.com/rahulgarg55/bug-tracker)** or **[Deploy Priyanka's Repository (Priyamittal-dev/bug-tracker)](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)**.
+2. Connect your GitHub account and select your preferred repository fork.
 3. Add your environment variables:
    - `DATABASE_URL`: Your PostgreSQL / SQLite connection string.
    - `AUTH_SECRET`: A 32-character random secret.
@@ -36,8 +36,9 @@ Deploy instantly to Vercel's global edge network:
 ---
 
 ### Option 2: Deploy with Render (Full-Stack + Managed Database)
-Click **[Deploy to Render](https://render.com/deploy?repo=https://github.com/Priyamittal-dev/bug-tracker)**:
-- Automatically provisions a managed database and builds the Next.js service via `render.yaml`.
+- **[Deploy Rahul's Repo to Render](https://render.com/deploy?repo=https://github.com/rahulgarg55/bug-tracker)**
+- **[Deploy Priyanka's Repo to Render](https://render.com/deploy?repo=https://github.com/Priyamittal-dev/bug-tracker)**
+Automatically provisions a managed database and builds the Next.js service via `render.yaml`.
 
 ---
 
@@ -107,8 +108,9 @@ npm test
 
 ---
 
-## 👤 Author & Maintainer
+## 👥 Authors & Maintainers
 
-**Priyanka Devi**
-- **GitHub:** [@Priyamittal-dev](https://github.com/Priyamittal-dev)
-- **Repository:** [Priyamittal-dev/bug-tracker](https://github.com/Priyamittal-dev/bug-tracker)
+| Contributor | GitHub Profile | Repository |
+|---|---|---|
+| **Rahul Garg** | [@rahulgarg55](https://github.com/rahulgarg55) | [rahulgarg55/bug-tracker](https://github.com/rahulgarg55/bug-tracker) |
+| **Priyanka Devi** | [@Priyamittal-dev](https://github.com/Priyamittal-dev) | [Priyamittal-dev/bug-tracker](https://github.com/Priyamittal-dev/bug-tracker) |
