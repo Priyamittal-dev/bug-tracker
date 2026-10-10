@@ -3,11 +3,17 @@ import authConfig from "./auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-const publicRoutes = [
+const authPages = [
   "/login",
   "/register",
   "/forgot-password",
   "/reset-password",
+];
+
+const publicContentRoutes = [
+  "/pricing",
+  "/docs",
+  "/api-docs",
 ];
 
 const publicApiPrefixes = [
@@ -24,20 +30,21 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route),
+  const isAuthPage = authPages.some((route) => pathname.startsWith(route));
+  const isPublicContent = publicContentRoutes.some((route) =>
+    pathname.startsWith(route)
   );
   const isPublicApi = publicApiPrefixes.some((prefix) =>
-    pathname.startsWith(prefix),
+    pathname.startsWith(prefix)
   );
 
-  // Allow public API routes and documentation
+  // Allow public API routes and documentation endpoints
   if (isPublicApi) {
     return;
   }
 
-  // Handle unauthenticated requests
-  if (!isLoggedIn && !isPublicRoute) {
+  // Handle unauthenticated requests to protected pages
+  if (!isLoggedIn && !isAuthPage && !isPublicContent) {
     // Return 401 JSON for protected API routes
     if (pathname.startsWith("/api/")) {
       return Response.json(
@@ -59,8 +66,8 @@ export default auth((req) => {
     );
   }
 
-  // Redirect authenticated users from public auth pages to dashboard
-  if (isLoggedIn && isPublicRoute) {
+  // Redirect authenticated users from guest auth pages (/login, /register) to dashboard
+  if (isLoggedIn && isAuthPage) {
     return Response.redirect(new URL("/", req.nextUrl));
   }
 });

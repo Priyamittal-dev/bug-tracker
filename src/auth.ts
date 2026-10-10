@@ -23,16 +23,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        let email = (credentials.email as string).toLowerCase().trim();
+        let password = credentials.password as string;
+
+        // Auto-correct if user accidentally swapped email and password fields
+        if (!email.includes("@") && password.includes("@")) {
+          const temp = email;
+          email = password.toLowerCase().trim();
+          password = temp;
+        }
+
         const user = await prisma.user.findUnique({
-          where: { email: (credentials.email as string).toLowerCase().trim() },
+          where: { email },
         });
 
         if (!user || !user.password) return null;
 
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          user.password,
-        );
+        // Verify password with raw input, or trimmed input if copy-pasted with whitespace
+        let isValid = await bcrypt.compare(password, user.password);
+        if (!isValid && password.trim() !== password) {
+          isValid = await bcrypt.compare(password.trim(), user.password);
+        }
 
         if (isValid) {
           return {

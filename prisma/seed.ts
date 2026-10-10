@@ -9,6 +9,7 @@ async function main() {
   const defaultPassword = await bcrypt.hash("password123", 10)
 
   // Clean existing data
+  await prisma.paymentTransaction.deleteMany()
   await prisma.invoice.deleteMany()
   await prisma.paymentMethod.deleteMany()
   await prisma.subscription.deleteMany()
@@ -432,7 +433,7 @@ async function main() {
     },
   })
 
-  await prisma.invoice.create({
+  const inv1 = await prisma.invoice.create({
     data: {
       organizationId: cloudOrg.id,
       billingAccountId: cloudBilling.id,
@@ -452,6 +453,23 @@ async function main() {
         { description: "Enterprise plan (yearly)", quantity: 1, unitAmountCents: 79000 },
       ]),
       memo: "Annual MSA · PO-CD-8841",
+    },
+  })
+
+  await prisma.paymentTransaction.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      invoiceId: inv1.id,
+      paymentMethodId: visa.id,
+      amountCents: 79000,
+      currency: "USD",
+      status: "SUCCEEDED",
+      type: "CHARGE",
+      gateway: "STRIPE_SANDBOX",
+      gatewayTransactionId: "ch_test_seed_cloud_annual",
+      gatewayResponseCode: "charge_captured",
+      description: "Annual Enterprise plan subscription",
     },
   })
 

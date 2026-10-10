@@ -2,12 +2,18 @@
   "name": "bug-tracker",
   "version": "0.1.0",
   "private": true,
+  "author": "Priyanka Devi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Priyamittal-dev/bug-tracker.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:unit": "vitest run tests/unit --isolate=false",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",

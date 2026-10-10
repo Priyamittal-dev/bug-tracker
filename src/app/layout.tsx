@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} flex h-screen overflow-hidden bg-background text-foreground antialiased`}
+        className={`${inter.className} min-h-screen w-full bg-background text-foreground antialiased`}
       >
         <ThemeProvider defaultTheme="system" storageKey="bugtracker-theme">
           <QueryProvider>{children}</QueryProvider>

@@ -82,3 +82,30 @@ export type ChangePlanInput = z.infer<typeof changePlanSchema>;
 export type UpdateBillingProfileInput = z.infer<
   typeof updateBillingProfileSchema
 >;
+
+export const refundTransactionSchema = z.object({
+  transactionId: z.string().min(1),
+  amountCents: z.coerce.number().int().positive().optional(),
+  reason: z.string().trim().max(250).optional(),
+});
+
+export const cancelSubscriptionSchema = z.object({
+  cancelAtPeriodEnd: z.boolean().default(true),
+  reason: z.string().trim().max(250).optional(),
+});
+
+export const payInvoiceSchema = z.object({
+  invoiceId: z.string().min(1),
+  paymentMethodId: z.string().optional(),
+});
+
+export const voidInvoiceSchema = z.object({
+  invoiceId: z.string().min(1),
+  reason: z.string().trim().max(250).optional(),
+});
+
+export type RefundTransactionInput = z.infer<typeof refundTransactionSchema>;
+export type CancelSubscriptionInput = z.infer<typeof cancelSubscriptionSchema>;
+export type PayInvoiceInput = z.infer<typeof payInvoiceSchema>;
+export type VoidInvoiceInput = z.infer<typeof voidInvoiceSchema>;
+

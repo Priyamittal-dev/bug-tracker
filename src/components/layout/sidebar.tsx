@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
   CreditCard,
+  Sparkles,
 } from "lucide-react";
 import { getProjects } from "@/app/actions/projects";
 import { getCurrentUserWithOrgs, getTenantContext } from "@/lib/tenant";
@@ -15,6 +16,8 @@ import { OrgSwitcher } from "./org-switcher";
 import { TeamMembersDialog } from "./team-members-dialog";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SpotlightTrigger } from "@/components/spotlight/spotlight-trigger";
+import { Code2 } from "lucide-react";
 
 export async function Sidebar() {
   const [userWithOrgs, tenant, projects] = await Promise.all([
@@ -54,6 +57,9 @@ export async function Sidebar() {
           organizations={organizations}
           activeOrgId={tenant.organizationId}
         />
+
+        {/* Global Spotlight Quick Trigger (⌘K) */}
+        <SpotlightTrigger />
       </div>
 
       {/* Main Nav */}
@@ -155,6 +161,23 @@ export async function Sidebar() {
           >
             <CreditCard className="h-4 w-4 text-muted-foreground" />
             Billing & Payments
+          </Link>
+          <Link
+            href="/pricing"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-muted text-foreground transition-colors"
+          >
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            Pricing & Plans
+          </Link>
+          <Link
+            href="/docs"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-muted text-foreground transition-colors group"
+          >
+            <Code2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span>API Docs & Swagger</span>
+            <span className="ml-auto font-mono text-[9px] bg-blue-500/10 text-blue-500 border border-blue-500/30 px-1 py-0.2 rounded font-bold">
+              OAS
+            </span>
           </Link>
         </div>
       </div>

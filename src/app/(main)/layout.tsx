@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ProductTour } from "@/components/guide/product-tour";
+import { SpotlightDialog } from "@/components/spotlight/spotlight-dialog";
 import { getCurrentUserWithOrgs } from "@/lib/tenant";
 import { redirect } from "next/navigation";
 
@@ -33,8 +34,12 @@ export default async function MainLayout({
         </main>
       </div>
 
+      {/* Global Spotlight Search Command Palette (⌘K) */}
+      <SpotlightDialog />
+
       {/* Interactive Website Guide / Product Tour */}
       <ProductTour />
     </div>
   );
 }
+

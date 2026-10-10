@@ -23,6 +23,7 @@ import {
 } from "@/components/common/issue-badges";
 import { formatDistanceToNow } from "date-fns";
 import { getTenantContext } from "@/lib/tenant";
+import { SpotlightTrigger } from "@/components/spotlight/spotlight-trigger";
 
 export default async function Dashboard() {
   const tenant = await getTenantContext();
@@ -116,6 +117,9 @@ export default async function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap shrink-0">
+            <div className="w-44 hidden lg:block">
+              <SpotlightTrigger />
+            </div>
             <Button
               size="sm"
               variant="outline"

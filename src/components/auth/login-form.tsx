@@ -28,11 +28,48 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeDemo, setActiveDemo] = useState<string | null>(null);
 
-  const handleQuickFill = (demoEmail: string, demoRole: string) => {
+  const getCallbackUrl = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const cb = params.get("callbackUrl");
+      if (cb && cb.startsWith("/")) return cb;
+    }
+    return "/";
+  };
+
+  const handleQuickFill = async (
+    demoEmail: string,
+    demoRole: string,
+    autoSubmit = false,
+  ) => {
     setEmail(demoEmail);
     setPassword("password123");
     setActiveDemo(demoRole);
     setError("");
+
+    if (autoSubmit) {
+      setIsLoading(true);
+      try {
+        const result = await signIn("credentials", {
+          email: demoEmail.toLowerCase().trim(),
+          password: "password123",
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError("Invalid email or password. Please verify your credentials.");
+          setIsLoading(false);
+        } else {
+          router.push(getCallbackUrl());
+          router.refresh();
+        }
+      } catch {
+        setError(
+          "An unexpected authentication error occurred. Please try again.",
+        );
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,10 +77,20 @@ export function LoginForm() {
     setIsLoading(true);
     setError("");
 
+    let cleanEmail = email.trim().toLowerCase();
+    let cleanPassword = password.trim();
+
+    // Auto-correct if user accidentally swapped email and password fields
+    if (!cleanEmail.includes("@") && cleanPassword.includes("@")) {
+      const temp = cleanEmail;
+      cleanEmail = cleanPassword;
+      cleanPassword = temp;
+    }
+
     try {
       const result = await signIn("credentials", {
-        email: email.trim().toLowerCase(),
-        password,
+        email: cleanEmail,
+        password: cleanPassword,
         redirect: false,
       });
 
@@ -51,7 +98,7 @@ export function LoginForm() {
         setError("Invalid email or password. Please verify your credentials.");
         setIsLoading(false);
       } else {
-        router.push("/");
+        router.push(getCallbackUrl());
         router.refresh();
       }
     } catch {

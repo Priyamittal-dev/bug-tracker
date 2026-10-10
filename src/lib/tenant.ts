@@ -26,7 +26,7 @@ export async function getCurrentUserWithOrgs() {
   const session = await auth();
   if (!session?.user?.email) return null;
 
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: {
       memberships: {
@@ -37,6 +37,82 @@ export async function getCurrentUserWithOrgs() {
       },
     },
   });
+
+  if (!user) return null;
+
+  // Auto-provision workspace for OAuth users (e.g. Google Sign-In) who don't have an organization yet
+  if (user.memberships.length === 0) {
+    try {
+      const rawName = user.name || user.email.split("@")[0] || "My Workspace";
+      const orgName = `${rawName}'s Workspace`;
+      const baseSlug = rawName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .slice(0, 20);
+      const slug = `${baseSlug || "workspace"}-${Date.now().toString(36)}`;
+
+      // Find existing demo organization to attach as secondary access
+      const demoOrg = await prisma.organization.findFirst({
+        where: { name: "CloudDesk Global" },
+      });
+
+      // Create their primary organization
+      const newOrg = await prisma.organization.create({
+        data: {
+          name: orgName,
+          slug,
+          plan: "PRO",
+        },
+      });
+
+      await prisma.membership.create({
+        data: {
+          organizationId: newOrg.id,
+          userId: user.id,
+          role: "OWNER",
+        },
+      });
+
+      // Link to demo org as ADMIN if available
+      if (demoOrg && demoOrg.id !== newOrg.id) {
+        await prisma.membership.create({
+          data: {
+            organizationId: demoOrg.id,
+            userId: user.id,
+            role: "ADMIN",
+          },
+        }).catch(() => null);
+      }
+
+      // Create starter project
+      const projKey = rawName.slice(0, 4).toUpperCase().replace(/[^A-Z]/g, "PRO");
+      await prisma.project.create({
+        data: {
+          organizationId: newOrg.id,
+          name: `${rawName} Primary Project`,
+          key: projKey.length < 2 ? "APP" : projKey,
+          category: "Software Application",
+          status: "ACTIVE",
+        },
+      }).catch(() => null);
+
+      // Refresh user with new memberships
+      user = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          memberships: {
+            include: {
+              organization: true,
+            },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Auto-provision error for user:", err);
+    }
+  }
 
   return user;
 }

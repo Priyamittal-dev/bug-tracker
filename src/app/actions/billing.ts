@@ -6,8 +6,12 @@ import { canReadBilling } from "@/lib/rbac";
 import { billingService } from "@/services/billing.service";
 import {
   addPaymentMethodSchema,
+  cancelSubscriptionSchema,
   changePlanSchema,
+  payInvoiceSchema,
+  refundTransactionSchema,
   updateBillingProfileSchema,
+  voidInvoiceSchema,
 } from "@/lib/validations/billing";
 
 function forbidden(): never {
@@ -41,7 +45,10 @@ export async function addPaymentMethodAction(input: unknown) {
     revalidatePath("/settings/billing");
     return { ok: true as const };
   } catch (error: any) {
-    return { ok: false as const, error: error.message || "Failed to add method" };
+    return {
+      ok: false as const,
+      error: error.message || "Failed to add method",
+    };
   }
 }
 
@@ -123,19 +130,133 @@ export async function updateBillingProfileAction(input: unknown) {
   }
 }
 
-export async function payInvoiceAction(invoiceId: string) {
+export async function payInvoiceAction(invoiceId: string, paymentMethodId?: string) {
   const tenant = await requireTenantContext();
+  const parsed = payInvoiceSchema.safeParse({ invoiceId, paymentMethodId });
+  if (!parsed.success) {
+    return { ok: false as const, error: "Invalid invoice payment parameters" };
+  }
   try {
     await billingService.payInvoice(
       tenant.organizationId,
       tenant.role,
-      invoiceId,
+      parsed.data.invoiceId,
+      parsed.data.paymentMethodId,
     );
     revalidatePath("/settings/billing");
     return { ok: true as const };
   } catch (error: any) {
     return { ok: false as const, error: error.message };
   }
+}
+
+export async function voidInvoiceAction(invoiceId: string, reason?: string) {
+  const tenant = await requireTenantContext();
+  const parsed = voidInvoiceSchema.safeParse({ invoiceId, reason });
+  if (!parsed.success) {
+    return { ok: false as const, error: "Invalid void request" };
+  }
+  try {
+    await billingService.voidInvoice(
+      tenant.organizationId,
+      tenant.role,
+      tenant.userId,
+      parsed.data,
+    );
+    revalidatePath("/settings/billing");
+    return { ok: true as const };
+  } catch (error: any) {
+    return { ok: false as const, error: error.message };
+  }
+}
+
+export async function refundTransactionAction(
+  transactionId: string,
+  amountCents?: number,
+  reason?: string,
+) {
+  const tenant = await requireTenantContext();
+  const parsed = refundTransactionSchema.safeParse({
+    transactionId,
+    amountCents,
+    reason,
+  });
+  if (!parsed.success) {
+    return { ok: false as const, error: "Invalid refund parameters" };
+  }
+  try {
+    await billingService.refundTransaction(
+      tenant.organizationId,
+      tenant.role,
+      tenant.userId,
+      parsed.data,
+    );
+    revalidatePath("/settings/billing");
+    return { ok: true as const };
+  } catch (error: any) {
+    return { ok: false as const, error: error.message };
+  }
+}
+
+export async function cancelSubscriptionAction(
+  cancelAtPeriodEnd = true,
+  reason?: string,
+) {
+  const tenant = await requireTenantContext();
+  const parsed = cancelSubscriptionSchema.safeParse({
+    cancelAtPeriodEnd,
+    reason,
+  });
+  if (!parsed.success) {
+    return { ok: false as const, error: "Invalid cancellation request" };
+  }
+  try {
+    await billingService.cancelSubscription(
+      tenant.organizationId,
+      tenant.role,
+      tenant.userId,
+      parsed.data,
+    );
+    revalidatePath("/settings/billing");
+    return { ok: true as const };
+  } catch (error: any) {
+    return { ok: false as const, error: error.message };
+  }
+}
+
+export async function reactivateSubscriptionAction() {
+  const tenant = await requireTenantContext();
+  try {
+    await billingService.reactivateSubscription(
+      tenant.organizationId,
+      tenant.role,
+      tenant.userId,
+    );
+    revalidatePath("/settings/billing");
+    return { ok: true as const };
+  } catch (error: any) {
+    return { ok: false as const, error: error.message };
+  }
+}
+
+export async function getInvoiceAction(invoiceId: string) {
+  const tenant = await requireTenantContext();
+  if (!canReadBilling(tenant.role) && !canReadBilling(tenant.userRole)) {
+    return null;
+  }
+  try {
+    return await billingService.getInvoice(tenant.organizationId, invoiceId);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPaymentTransactionsAction(status?: string) {
+  const tenant = await requireTenantContext();
+  if (!canReadBilling(tenant.role) && !canReadBilling(tenant.userRole)) {
+    return [];
+  }
+  return billingService.getTransactions(tenant.organizationId, { status });
 }
 
 export async function requireBillingAdmin() {
