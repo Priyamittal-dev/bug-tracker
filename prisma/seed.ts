@@ -9,6 +9,10 @@ async function main() {
   const defaultPassword = await bcrypt.hash("password123", 10)
 
   // Clean existing data
+  await prisma.invoice.deleteMany()
+  await prisma.paymentMethod.deleteMany()
+  await prisma.subscription.deleteMany()
+  await prisma.billingAccount.deleteMany()
   await prisma.comment.deleteMany()
   await prisma.issue.deleteMany()
   await prisma.milestone.deleteMany()
@@ -344,7 +348,178 @@ async function main() {
     ],
   })
 
-  console.log("Multi-Tenant database successfully initialized with organizations, memberships, teams, projects, and issues!")
+  const now = new Date()
+  const periodEnd = new Date(now)
+  periodEnd.setMonth(periodEnd.getMonth() + 1)
+
+  const cloudBilling = await prisma.billingAccount.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingEmail: "ap@clouddesk.example",
+      companyName: "CloudDesk Global, Inc.",
+      taxId: "94-1234567",
+      taxIdType: "EIN",
+      addressLine1: "88 Market Street",
+      city: "San Francisco",
+      region: "CA",
+      postalCode: "94105",
+      country: "US",
+      currency: "USD",
+      collectionMethod: "SEND_INVOICE",
+      poNumber: "PO-CD-8841",
+      netTermsDays: 30,
+    },
+  })
+
+  await prisma.subscription.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      planKey: "ENTERPRISE",
+      status: "ACTIVE",
+      billingInterval: "YEARLY",
+      seatQuantity: 50,
+      currentPeriodStart: now,
+      currentPeriodEnd: new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()),
+    },
+  })
+
+  const visa = await prisma.paymentMethod.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      type: "CARD",
+      brand: "visa",
+      last4: "4242",
+      expMonth: 12,
+      expYear: 2028,
+      holderName: "CloudDesk Treasury",
+      fingerprint: "seed-clouddesk-visa-4242",
+      billingCountry: "US",
+      isDefault: false,
+      status: "ACTIVE",
+    },
+  })
+
+  await prisma.paymentMethod.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      type: "ACH",
+      brand: "bank",
+      last4: "9910",
+      holderName: "CloudDesk Global, Inc.",
+      bankName: "JPMorgan Chase",
+      fingerprint: "seed-clouddesk-ach-9910",
+      billingCountry: "US",
+      isDefault: false,
+      status: "ACTIVE",
+    },
+  })
+
+  await prisma.paymentMethod.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      type: "INVOICE",
+      brand: "invoice",
+      last4: "8841",
+      holderName: "Accounts Payable",
+      fingerprint: "seed-clouddesk-po-8841",
+      billingCountry: "US",
+      isDefault: true,
+      status: "ACTIVE",
+    },
+  })
+
+  await prisma.invoice.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      paymentMethodId: visa.id,
+      number: "INV-CLOUD-2026-0001",
+      status: "PAID",
+      currency: "USD",
+      subtotalCents: 79000,
+      taxCents: 0,
+      totalCents: 79000,
+      amountPaidCents: 79000,
+      periodStart: now,
+      periodEnd: new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()),
+      dueDate: now,
+      paidAt: now,
+      lineItemsJson: JSON.stringify([
+        { description: "Enterprise plan (yearly)", quantity: 1, unitAmountCents: 79000 },
+      ]),
+      memo: "Annual MSA · PO-CD-8841",
+    },
+  })
+
+  await prisma.invoice.create({
+    data: {
+      organizationId: cloudOrg.id,
+      billingAccountId: cloudBilling.id,
+      number: "INV-CLOUD-2026-0002",
+      status: "OPEN",
+      currency: "USD",
+      subtotalCents: 15000,
+      taxCents: 0,
+      totalCents: 15000,
+      amountPaidCents: 0,
+      periodStart: now,
+      periodEnd: periodEnd,
+      dueDate: periodEnd,
+      lineItemsJson: JSON.stringify([
+        { description: "Additional seats (10)", quantity: 10, unitAmountCents: 1500 },
+      ]),
+      memo: "Net 30 · PO-CD-8841",
+    },
+  })
+
+  const finBilling = await prisma.billingAccount.create({
+    data: {
+      organizationId: finOrg.id,
+      billingEmail: "finance@finpay.example",
+      companyName: "FinPay Technologies Ltd.",
+      taxId: "GB123456789",
+      taxIdType: "VAT",
+      country: "GB",
+      currency: "USD",
+      collectionMethod: "CHARGE_AUTOMATICALLY",
+    },
+  })
+
+  await prisma.subscription.create({
+    data: {
+      organizationId: finOrg.id,
+      billingAccountId: finBilling.id,
+      planKey: "TEAM",
+      status: "ACTIVE",
+      billingInterval: "MONTHLY",
+      seatQuantity: 10,
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+    },
+  })
+
+  await prisma.paymentMethod.create({
+    data: {
+      organizationId: finOrg.id,
+      billingAccountId: finBilling.id,
+      type: "CARD",
+      brand: "mastercard",
+      last4: "4444",
+      expMonth: 9,
+      expYear: 2027,
+      holderName: "Alex Rivera",
+      fingerprint: "seed-finpay-mc-4444",
+      billingCountry: "GB",
+      isDefault: true,
+      status: "ACTIVE",
+    },
+  })
+
+  console.log("Multi-Tenant database successfully initialized with organizations, memberships, teams, projects, issues, and billing!")
 }
 
 main()

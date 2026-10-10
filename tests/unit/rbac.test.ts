@@ -42,6 +42,7 @@ describe("Unit: Role-Based Access Control (RBAC)", () => {
     expect(canManageMembers("ORGANIZATION_OWNER")).toBe(true);
     expect(canManageRoles("ORGANIZATION_OWNER")).toBe(true);
     expect(canManageTeams("ORGANIZATION_OWNER")).toBe(true);
+    expect(hasPermission("ORGANIZATION_OWNER", "billing.manage")).toBe(true);
   });
 
   it("should enforce ORGANIZATION_ADMIN permissions", () => {
@@ -70,6 +71,7 @@ describe("Unit: Role-Based Access Control (RBAC)", () => {
     );
     expect(hasPermission("DEVELOPER", "organization.roles.manage")).toBe(false);
     expect(hasPermission("DEVELOPER", "team.create")).toBe(false);
+    expect(hasPermission("DEVELOPER", "billing.manage")).toBe(false);
   });
 
   it("should restrict QA_ENGINEER appropriately", () => {

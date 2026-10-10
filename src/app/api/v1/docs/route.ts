@@ -69,7 +69,10 @@ export async function GET() {
             id: { type: "string" },
             name: { type: "string" },
             slug: { type: "string" },
-            plan: { type: "string", enum: ["FREE", "PRO", "ENTERPRISE"] },
+            plan: {
+              type: "string",
+              enum: ["FREE", "TEAM", "BUSINESS", "ENTERPRISE"],
+            },
             status: {
               type: "string",
               enum: ["ACTIVE", "ARCHIVED", "SUSPENDED"],
@@ -627,6 +630,45 @@ export async function GET() {
           responses: {
             "200": { description: "Member removed from team" },
             "403": { description: "Forbidden" },
+          },
+        },
+      },
+      "/billing": {
+        get: {
+          summary: "Get workspace billing overview",
+          tags: ["Billing"],
+          security: [{ SessionCookie: [] }],
+          responses: {
+            "200": { description: "Subscription, payment methods, invoices" },
+            "403": { description: "Forbidden" },
+          },
+        },
+        post: {
+          summary: "Change subscription plan",
+          tags: ["Billing"],
+          security: [{ SessionCookie: [] }],
+          responses: {
+            "200": { description: "Plan updated and invoice issued" },
+            "400": { description: "Payment method required" },
+          },
+        },
+      },
+      "/billing/payment-methods": {
+        post: {
+          summary: "Add a tokenized payment method (card, ACH, SEPA, invoice)",
+          tags: ["Billing"],
+          security: [{ SessionCookie: [] }],
+          responses: {
+            "201": { description: "Payment method stored without PAN/CVC" },
+            "400": { description: "Validation error" },
+          },
+        },
+        delete: {
+          summary: "Remove a payment method",
+          tags: ["Billing"],
+          security: [{ SessionCookie: [] }],
+          responses: {
+            "200": { description: "Payment method removed" },
           },
         },
       },

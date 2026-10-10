@@ -6,6 +6,7 @@ import {
   Workflow,
   Settings,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { getProjects } from "@/app/actions/projects";
 import { getCurrentUserWithOrgs, getTenantContext } from "@/lib/tenant";
@@ -147,6 +148,13 @@ export async function Sidebar() {
           >
             <Settings className="h-4 w-4 text-muted-foreground" />
             Workspace Settings
+          </Link>
+          <Link
+            href="/settings/billing"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-muted text-foreground transition-colors"
+          >
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            Billing & Payments
           </Link>
         </div>
       </div>

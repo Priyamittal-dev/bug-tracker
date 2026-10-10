@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
     "daily-enhance": "node scripts/daily-enhancer.js",
     "daily-enhance:daemon": "node scripts/daily-enhancer.js --daemon"
   },

@@ -101,7 +101,7 @@ model Organization {
   slug        String   @unique
   logoUrl     String?
   status      String   @default("ACTIVE") // ACTIVE, ARCHIVED, SUSPENDED
-  plan        String   @default("FREE") // FREE, PRO, ENTERPRISE
+  plan        String   @default("FREE") // FREE, TEAM, PRO, BUSINESS, ENTERPRISE
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -121,6 +121,11 @@ model Organization {
   releases        Release[]
   issueWatchers   IssueWatcher[]
   notifications   Notification[]
+  billingAccount  BillingAccount?
+  subscription    Subscription?
+  paymentMethods  PaymentMethod[]
+  invoices        Invoice[]
+  paymentTransactions PaymentTransaction[]
 
   @@index([slug])
 }
@@ -803,4 +808,159 @@ model IssueWatcher {
   @@unique([issueId, userId])
   @@index([organizationId, issueId])
   @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// 12. Enterprise Billing, Subscriptions & Payment Methods
+// -----------------------------------------------------------------------------
+
+model BillingAccount {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  billingEmail      String
+  companyName       String?
+  taxId             String?
+  taxIdType         String? // VAT, GST, EIN, ABN, GSTIN
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  region            String?
+  postalCode        String?
+  country           String  @default("US")
+  currency          String  @default("USD")
+  collectionMethod  String  @default("CHARGE_AUTOMATICALLY") // CHARGE_AUTOMATICALLY, SEND_INVOICE
+  poNumber          String?
+  netTermsDays      Int     @default(30)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  paymentMethods      PaymentMethod[]
+  invoices            Invoice[]
+  subscription        Subscription?
+  paymentTransactions PaymentTransaction[]
+
+  @@index([organizationId])
+}
+
+model Subscription {
+  id               String         @id @default(cuid())
+  organizationId   String         @unique
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingAccountId String         @unique
+  billingAccount   BillingAccount @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+
+  planKey          String   @default("FREE") // FREE, TEAM, BUSINESS, ENTERPRISE
+  status           String   @default("ACTIVE") // TRIALING, ACTIVE, PAST_DUE, CANCELED, UNPAID
+  billingInterval  String   @default("MONTHLY") // MONTHLY, YEARLY
+  seatQuantity     Int      @default(5)
+  trialEndsAt      DateTime?
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean  @default(false)
+  canceledAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, status])
+}
+
+model PaymentMethod {
+  id               String         @id @default(cuid())
+  organizationId   String
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingAccountId String
+  billingAccount   BillingAccount @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+
+  type          String  // CARD, ACH, SEPA_DEBIT, WIRE, INVOICE
+  brand         String? // visa, mastercard, amex, discover, bank
+  last4         String
+  expMonth      Int?
+  expYear       Int?
+  holderName    String?
+  bankName      String?
+  fingerprint   String
+  billingCountry String?
+  isDefault     Boolean @default(false)
+  status        String  @default("ACTIVE") // ACTIVE, EXPIRED, FAILED, REMOVED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoices  Invoice[]
+  paymentTransactions PaymentTransaction[]
+
+  @@index([organizationId, status])
+  @@index([billingAccountId])
+  @@index([fingerprint])
+}
+
+model Invoice {
+  id               String         @id @default(cuid())
+  organizationId   String
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingAccountId String
+  billingAccount   BillingAccount @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  paymentMethodId  String?
+  paymentMethod    PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  number          String @unique
+  status          String @default("OPEN") // DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE
+  currency        String @default("USD")
+  subtotalCents   Int
+  taxCents        Int    @default(0)
+  totalCents      Int
+  amountPaidCents Int    @default(0)
+  periodStart     DateTime
+  periodEnd       DateTime
+  dueDate         DateTime
+  paidAt          DateTime?
+  lineItemsJson   String // JSON array of { description, quantity, unitAmountCents }
+  memo            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  paymentTransactions PaymentTransaction[]
+
+  @@index([organizationId, createdAt])
+  @@index([billingAccountId])
+  @@index([status])
+}
+
+model PaymentTransaction {
+  id               String         @id @default(cuid())
+  organizationId   String
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingAccountId String
+  billingAccount   BillingAccount @relation(fields: [billingAccountId], references: [id], onDelete: Cascade)
+  invoiceId        String?
+  invoice          Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  paymentMethodId  String?
+  paymentMethod    PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  amountCents         Int
+  currency            String   @default("USD")
+  status              String   @default("PENDING") // PENDING, PROCESSING, SUCCEEDED, FAILED, REFUNDED
+  type                String   @default("CHARGE") // CHARGE, REFUND, VERIFICATION
+  gateway             String   @default("STRIPE_SANDBOX")
+  gatewayTransactionId String
+  gatewayResponseCode String?
+  failureReason       String?
+  refundedAmountCents Int      @default(0)
+  description         String?
+  metadata            String?  // JSON string
+  ipAddress           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([billingAccountId])
+  @@index([invoiceId])
+  @@index([paymentMethodId])
+  @@index([status])
+  @@index([gatewayTransactionId])
 }

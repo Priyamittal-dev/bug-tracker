@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Shield, Building2, Users, Layers } from "lucide-react";
+import { User, Shield, Building2, Users, Layers, CreditCard } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/settings/profile", label: "Profile", icon: User },
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/settings/organizations", label: "Organizations", icon: Building2 },
   { href: "/settings/members", label: "Members & RBAC", icon: Users },
   { href: "/settings/teams", label: "Teams & Squads", icon: Layers },
+  { href: "/settings/billing", label: "Billing & Payments", icon: CreditCard },
 ];
 
 export default function SettingsLayout({

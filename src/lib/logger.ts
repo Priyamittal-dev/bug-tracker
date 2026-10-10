@@ -22,6 +22,12 @@ const SENSITIVE_KEYS = new Set([
   "refreshtoken",
   "apikey",
   "privatekey",
+  "pan",
+  "cvc",
+  "cvv",
+  "accountnumber",
+  "routingnumber",
+  "iban",
 ]);
 
 function sanitize(obj: any): any {

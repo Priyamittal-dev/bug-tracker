@@ -21,6 +21,8 @@ export type Permission =
   | "organization.delete"
   | "organization.members.manage"
   | "organization.roles.manage"
+  | "billing.read"
+  | "billing.manage"
   // Team permissions
   | "team.read"
   | "team.create"
@@ -80,6 +82,8 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "organization.delete",
     "organization.members.manage",
     "organization.roles.manage",
+    "billing.read",
+    "billing.manage",
     "team.read",
     "team.create",
     "team.update",
@@ -120,6 +124,8 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "organization.update",
     "organization.members.manage",
     "organization.roles.manage",
+    "billing.read",
+    "billing.manage",
     "team.read",
     "team.create",
     "team.update",
@@ -326,6 +332,18 @@ export function canManageTeams(
   role: Role | string | undefined | null,
 ): boolean {
   return hasPermission(role, "team.create");
+}
+
+export function canManageBilling(
+  role: Role | string | undefined | null,
+): boolean {
+  return hasPermission(role, "billing.manage");
+}
+
+export function canReadBilling(
+  role: Role | string | undefined | null,
+): boolean {
+  return hasPermission(role, "billing.read") || canManageBilling(role);
 }
 
 export function canCreateProject(

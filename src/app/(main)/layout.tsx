@@ -1,12 +1,19 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ProductTour } from "@/components/guide/product-tour";
+import { getCurrentUserWithOrgs } from "@/lib/tenant";
+import { redirect } from "next/navigation";
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const userWithOrgs = await getCurrentUserWithOrgs();
+  if (userWithOrgs && userWithOrgs.memberships.length === 0) {
+    redirect("/onboarding");
+  }
+
   return (
     <div className="flex h-screen overflow-hidden w-full relative bg-background text-foreground antialiased">
       {/* Desktop Sidebar */}

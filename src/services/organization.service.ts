@@ -74,6 +74,13 @@ export class OrganizationService {
       organizationId: result.org.id,
     });
 
+    const { billingService } = await import("@/services/billing.service");
+    const owner = await prisma.user.findUnique({ where: { id: userId } });
+    await billingService.ensureAccount(
+      result.org.id,
+      owner?.email || `billing@${result.org.slug}.local`,
+    );
+
     return result.org;
   }
 
