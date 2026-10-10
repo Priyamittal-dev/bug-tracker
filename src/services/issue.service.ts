@@ -793,7 +793,7 @@ export class IssueService {
           content,
         },
         include: {
-          author: { select: { id: true, name: true, avatar: true } },
+          author: { select: { id: true, name: true, avatar: true, jobTitle: true } },
         },
       });
 

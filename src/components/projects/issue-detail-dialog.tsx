@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   updateIssue,
@@ -79,7 +79,8 @@ type IssueWithDetails = {
     author: {
       name: string;
       avatar: string | null;
-      role: string;
+      role?: string;
+      jobTitle?: string;
     };
   }>;
 };
@@ -105,6 +106,14 @@ export function IssueDetailDialog({
   const [commentText, setCommentText] = useState("");
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [description, setDescription] = useState(issue?.description || "");
+  const [comments, setComments] = useState<any[]>(issue?.comments || []);
+
+  useEffect(() => {
+    if (issue) {
+      setComments(issue.comments || []);
+      setDescription(issue.description || "");
+    }
+  }, [issue]);
 
   if (!issue) return null;
 
@@ -135,11 +144,19 @@ export function IssueDetailDialog({
 
   async function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!commentText.trim() || !issue) return;
+    const text = commentText.trim();
+    if (!text || !issue) return;
     startTransition(async () => {
-      await addComment(issue.id, commentText);
-      setCommentText("");
-      router.refresh();
+      try {
+        const newComment = await addComment(issue.id, text);
+        if (newComment) {
+          setComments((prev) => [...prev, newComment]);
+        }
+        setCommentText("");
+        router.refresh();
+      } catch (err: any) {
+        console.error("Failed to post comment:", err);
+      }
     });
   }
 
@@ -265,11 +282,11 @@ export function IssueDetailDialog({
             <div className="space-y-4 pt-4 border-t border-border/60">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" />
-                Comments & Collaboration ({issue.comments?.length || 0})
+                Comments & Collaboration ({comments.length})
               </h3>
 
               <div className="space-y-3">
-                {issue.comments?.map((comment) => (
+                {comments.map((comment) => (
                   <div
                     key={comment.id}
                     className="p-3 rounded-xl bg-muted/20 border border-border/50 space-y-2 text-xs"
@@ -277,22 +294,26 @@ export function IssueDetailDialog({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-5 w-5">
-                          <AvatarImage src={comment.author.avatar || ""} />
+                          <AvatarImage src={comment.author?.avatar || ""} />
                           <AvatarFallback className="text-[9px]">
-                            {comment.author.name[0]}
+                            {(comment.author?.name || "U")[0]}
                           </AvatarFallback>
                         </Avatar>
                         <span className="font-bold text-foreground">
-                          {comment.author.name}
+                          {comment.author?.name || "Team Member"}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          ({comment.author.role})
-                        </span>
+                        {(comment.author?.jobTitle || comment.author?.role) && (
+                          <span className="text-[10px] text-muted-foreground">
+                            ({comment.author?.jobTitle || comment.author?.role})
+                          </span>
+                        )}
                       </div>
                       <span className="text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(comment.createdAt), {
-                          addSuffix: true,
-                        })}
+                        {comment.createdAt
+                          ? formatDistanceToNow(new Date(comment.createdAt), {
+                              addSuffix: true,
+                            })
+                          : "just now"}
                       </span>
                     </div>
                     <p className="text-foreground whitespace-pre-wrap leading-normal pl-7">
@@ -301,7 +322,7 @@ export function IssueDetailDialog({
                   </div>
                 ))}
 
-                {(!issue.comments || issue.comments.length === 0) && (
+                {comments.length === 0 && (
                   <p className="text-xs text-muted-foreground italic py-2">
                     No comments yet. Be the first to leave a note.
                   </p>

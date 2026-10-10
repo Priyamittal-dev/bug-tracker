@@ -370,7 +370,16 @@ export async function addComment(issueId: string, content: string) {
     content.trim(),
   );
 
+  const issue = await prisma.issue.findUnique({
+    where: { id: issueId },
+    select: { projectId: true },
+  });
+
+  if (issue?.projectId) {
+    revalidatePath(`/projects/${issue.projectId}`);
+  }
   revalidatePath(`/issues/${issueId}`);
+  revalidatePath(`/issues`);
   return comment;
 }
 

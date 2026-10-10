@@ -12,7 +12,7 @@ if (googleId && googleSecret && !googleId.includes("your-")) {
     Google({
       clientId: googleId,
       clientSecret: googleSecret,
-      checks: ["none"],
+      checks: ["pkce"],
       allowDangerousEmailAccountLinking: true,
     })
   );
@@ -42,6 +42,7 @@ providers.push(
 );
 
 export default {
+  trustHost: true,
   providers,
   callbacks: {
     jwt({ token, user }) {

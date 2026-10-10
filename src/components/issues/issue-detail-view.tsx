@@ -92,6 +92,7 @@ export function IssueDetailView({
 
   // Comments
   const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<any[]>(issue.comments || []);
 
   // Add Relationship
   const [isAddingRel, setIsAddingRel] = useState(false);
@@ -158,18 +159,31 @@ export function IssueDetailView({
 
   async function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    const text = commentText.trim();
+    if (!text) return;
     startTransition(async () => {
-      await addComment(issue.id, commentText);
-      setCommentText("");
-      router.refresh();
+      try {
+        const newComment = await addComment(issue.id, text);
+        if (newComment) {
+          setComments((prev) => [...prev, newComment]);
+        }
+        setCommentText("");
+        router.refresh();
+      } catch (err: any) {
+        console.error("Failed to add comment:", err);
+      }
     });
   }
 
   async function handleDeleteComment(commentId: string) {
     startTransition(async () => {
-      await deleteComment(commentId);
-      router.refresh();
+      try {
+        await deleteComment(commentId);
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+        router.refresh();
+      } catch (err: any) {
+        console.error("Failed to delete comment:", err);
+      }
     });
   }
 
@@ -821,7 +835,7 @@ export function IssueDetailView({
                 }`}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                Comments ({issue.comments?.length || 0})
+                Comments ({comments.length})
               </button>
 
               <button
@@ -842,7 +856,7 @@ export function IssueDetailView({
                 <div className="space-y-4">
                   {/* Comments list */}
                   <div className="space-y-3">
-                    {issue.comments?.map((c: any) => (
+                    {comments.map((c: any) => (
                       <div
                         key={c.id}
                         className="p-3.5 rounded-lg bg-muted/20 border space-y-2 text-xs"
