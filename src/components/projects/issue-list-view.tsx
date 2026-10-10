@@ -28,6 +28,8 @@ import {
   Calendar,
   X,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 type Issue = {
@@ -84,6 +86,9 @@ export function IssueListView({
   >("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
@@ -131,6 +136,12 @@ export function IssueListView({
       }
       return 0;
     });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filtered.length);
+  const paginated = filtered.slice(startIndex, startIndex + pageSize);
 
   function toggleSort(field: "key" | "severity" | "priority" | "date") {
     if (sortBy === field) {
@@ -316,7 +327,7 @@ export function IssueListView({
               </TableRow>
             </TableHeader>
             <TableBody className="text-xs">
-              {filtered.map((issue) => (
+              {paginated.map((issue) => (
                 <TableRow
                   key={issue.id}
                   onClick={() => {
@@ -401,6 +412,62 @@ export function IssueListView({
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination Toolbar */}
+        {filtered.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-card border-t border-border/60 text-xs">
+            <div className="text-muted-foreground flex items-center gap-2">
+              <span>
+                Showing <strong className="text-foreground">{startIndex + 1}</strong> to{" "}
+                <strong className="text-foreground">{endIndex}</strong> of{" "}
+                <strong className="text-foreground">{filtered.length}</strong> issues
+              </span>
+              <span className="text-border">|</span>
+              <div className="flex items-center gap-1.5">
+                <span>Per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="h-7 rounded border border-input bg-background px-1.5 text-xs font-medium focus:outline-none"
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="h-7 px-2.5 text-xs gap-1"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Previous
+              </Button>
+              <span className="text-muted-foreground font-medium px-2">
+                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="h-7 px-2.5 text-xs gap-1"
+              >
+                Next
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <IssueDetailDialog
