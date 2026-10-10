@@ -255,7 +255,7 @@ export async function generateLoadTestData() {
 
   // 1. Ensure / Create 50 Core Users
   console.log("Creating/verifying 50 engineering users...");
-  const users: Array<{ id: string; email: string; name: string }> = [];
+  const users: Array<any> = [];
 
   // Always guarantee rahul@bugtracker.io as primary admin
   const rahul = await prisma.user.upsert({
