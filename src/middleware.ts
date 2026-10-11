@@ -14,6 +14,7 @@ const publicContentRoutes = [
   "/pricing",
   "/docs",
   "/api-docs",
+  "/logout",
 ];
 
 const publicApiPrefixes = [

@@ -38,9 +38,45 @@ export async function getCurrentUserWithOrgs() {
     },
   });
 
+  if (!user) {
+    try {
+      const rawName = session.user.name || session.user.email.split("@")[0] || "Team Member";
+      const jobTitle = (session.user as any).jobTitle || "Principal Systems Architect & Founder";
+      user = await prisma.user.create({
+        data: {
+          id: session.user.id || `usr-${Date.now().toString(36)}`,
+          email: session.user.email,
+          name: rawName,
+          jobTitle,
+          status: "ACTIVE",
+        },
+        include: {
+          memberships: {
+            include: {
+              organization: true,
+            },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      });
+    } catch {
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: {
+          memberships: {
+            include: {
+              organization: true,
+            },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      });
+    }
+  }
+
   if (!user) return null;
 
-  // Auto-provision workspace for OAuth users (e.g. Google Sign-In) who don't have an organization yet
+  // Auto-provision workspace for OAuth users (e.g. Google Sign-In) or demo users who don't have an organization yet
   if (user.memberships.length === 0) {
     try {
       const rawName = user.name || user.email.split("@")[0] || "My Workspace";
