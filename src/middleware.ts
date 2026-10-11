@@ -68,7 +68,17 @@ export default auth((req) => {
 
   // Redirect authenticated users from guest auth pages (/login, /register) to dashboard
   if (isLoggedIn && isAuthPage) {
-    return Response.redirect(new URL("/", req.nextUrl));
+    const rawCallback = req.nextUrl.searchParams.get("callbackUrl");
+    let target = "/";
+    if (
+      rawCallback &&
+      rawCallback.startsWith("/") &&
+      !rawCallback.startsWith("/login") &&
+      !rawCallback.startsWith("/register")
+    ) {
+      target = rawCallback;
+    }
+    return Response.redirect(new URL(target, req.nextUrl));
   }
 });
 

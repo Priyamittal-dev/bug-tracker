@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { LoginForm } from "@/components/auth/login-form";
 import {
   ShieldAlert,
@@ -11,12 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export default async function LoginPage() {
-  const session = await auth();
-
-  if (session?.user) {
-    redirect("/");
-  }
+export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full flex bg-background">

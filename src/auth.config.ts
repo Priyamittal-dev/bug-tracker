@@ -41,8 +41,15 @@ providers.push(
   })
 );
 
+export const AUTH_SECRET =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  "f6869bca7284-enterprise-secret-bugtracker";
+
 export default {
   trustHost: true,
+  secret: AUTH_SECRET,
+  session: { strategy: "jwt" },
   providers,
   callbacks: {
     jwt({ token, user }) {

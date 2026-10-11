@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { RegisterForm } from "@/components/auth/register-form";
 import {
   ShieldCheck,
@@ -10,12 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export default async function RegisterPage() {
-  const session = await auth();
-
-  if (session?.user) {
-    redirect("/");
-  }
+export default function RegisterPage() {
 
   return (
     <div className="min-h-screen w-full flex bg-background">

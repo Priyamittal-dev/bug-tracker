@@ -27,10 +27,14 @@ function resolveDatabaseUrl(): string | undefined {
     const targetDbPath = path.join(tmpDir, "dev.db");
 
     try {
-      if (!fs.existsSync(targetDbPath) || fs.statSync(targetDbPath).size === 0) {
-        // Statically scoped path to bundled SQLite database in prisma/
-        const sourceDbPath = path.join(process.cwd(), "prisma", "dev.db");
-        if (fs.existsSync(sourceDbPath) && fs.statSync(sourceDbPath).size > 0) {
+      const sourceDbPath = path.join(process.cwd(), "prisma", "dev.db");
+      const sourceExists = fs.existsSync(sourceDbPath) && fs.statSync(sourceDbPath).size > 0;
+      const targetExists = fs.existsSync(targetDbPath);
+      const targetSize = targetExists ? fs.statSync(targetDbPath).size : 0;
+      const shouldCopy = !targetExists || targetSize === 0 || (sourceExists && targetSize < fs.statSync(sourceDbPath).size);
+
+      if (shouldCopy) {
+        if (sourceExists) {
           fs.copyFileSync(sourceDbPath, targetDbPath);
         } else {
           const fallbackPath = path.join(process.cwd(), "dev.db");
