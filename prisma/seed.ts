@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("Seeding Enterprise Multi-Tenant SaaS database...")
 
-  const defaultPassword = await bcrypt.hash("password123", 10)
+  const defaultPassword = await bcrypt.hash("Rahul@BugTracker2026!", 10)
 
   // Clean existing data
   await prisma.paymentTransaction.deleteMany()

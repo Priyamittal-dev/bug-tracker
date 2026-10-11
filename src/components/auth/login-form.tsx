@@ -43,7 +43,7 @@ export function LoginForm() {
     autoSubmit = false,
   ) => {
     setEmail(demoEmail);
-    setPassword("password123");
+    setPassword("Rahul@BugTracker2026!");
     setActiveDemo(demoRole);
     setError("");
 
@@ -52,7 +52,7 @@ export function LoginForm() {
       try {
         const result = await signIn("credentials", {
           email: demoEmail.toLowerCase().trim(),
-          password: "password123",
+          password: "Rahul@BugTracker2026!",
           redirect: false,
         });
 
@@ -118,15 +118,31 @@ export function LoginForm() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             1-Click Demo Testing Accounts
           </span>
-          <span className="text-[11px] font-mono text-muted-foreground">
-            pwd: password123
+          <span className="text-[11px] font-mono text-muted-foreground font-semibold text-primary">
+            pwd: Rahul@BugTracker2026!
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 pt-1">
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => handleQuickFill("rahul@bugtracker.io", "architect")}
+            className="text-left p-2 rounded-lg text-xs border transition-all hover:border-primary/50"
+          >
+            <div className="font-medium text-foreground flex items-center justify-between">
+              <span>Rahul (Lead)</span>
+              {activeDemo === "architect" && (
+                <CheckCircle2 className="h-3 w-3 text-primary" />
+              )}
+            </div>
+            <div className="text-[10px] text-muted-foreground truncate">
+              rahul@bugtracker.io
+            </div>
+          </button>
+
           <button
             type="button"
             onClick={() => handleQuickFill("priyanka@bugtracker.io", "admin")}
-            className="text-left p-2 rounded-lg text-xs border transition-all"
+            className="text-left p-2 rounded-lg text-xs border transition-all hover:border-primary/50"
           >
             <div className="font-medium text-foreground flex items-center justify-between">
               <span>Admin / Owner</span>
@@ -142,7 +158,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => handleQuickFill("sarah.chen@bugtracker.io", "qa")}
-            className="text-left p-2 rounded-lg text-xs border transition-all"
+            className="text-left p-2 rounded-lg text-xs border transition-all hover:border-primary/50"
           >
             <div className="font-medium text-foreground flex items-center justify-between">
               <span>QA Lead</span>
