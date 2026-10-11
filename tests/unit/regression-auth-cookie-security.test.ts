@@ -118,7 +118,7 @@ describe("Regression & Security: NextAuth Session Cookie Strategy & Names", () =
 });
 
 describe("Regression & Security: Enterprise Password Strength & Hash Verification", () => {
-  const STRONG_PASSWORD = "Rahul@BugTracker2026!";
+  const STRONG_PASSWORD = "BugTracker@2026!";
 
   it("should verify bcrypt hash generation and matching for enterprise credentials", async () => {
     const salt = await bcrypt.genSalt(10);
@@ -144,7 +144,7 @@ describe("Regression & Security: Enterprise Password Strength & Hash Verificatio
       return hasMinLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
     };
 
-    expect(validateComplexity("Rahul@BugTracker2026!")).toBe(true);
+    expect(validateComplexity("BugTracker@2026!")).toBe(true);
     expect(validateComplexity("password123")).toBe(false); // No uppercase, no special, too short
     expect(validateComplexity("Short1!")).toBe(false); // Too short
     expect(validateComplexity("NoSpecialChar123")).toBe(false); // No special char

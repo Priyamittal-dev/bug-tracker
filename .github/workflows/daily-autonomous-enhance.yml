@@ -47,11 +47,11 @@ jobs:
       - name: ?? Append Step Summary Report
         if: always()
         run: |
-          echo "## ?? Daily Autonomous Enhancement Report" >> 
+          echo "## 🚀 Daily Autonomous Enhancement Report" >> $GITHUB_STEP_SUMMARY
           if [ -f DAILY_ENHANCEMENT_LOG.md ]; then
-            tail -n 35 DAILY_ENHANCEMENT_LOG.md >> 
+            tail -n 35 DAILY_ENHANCEMENT_LOG.md >> $GITHUB_STEP_SUMMARY
           else
-            echo "No changes logged." >> 
+            echo "No changes logged." >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: ?? Commit and Push Verified Enhancement to Main

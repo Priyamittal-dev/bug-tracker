@@ -13,7 +13,7 @@ function randInt(min: number, max: number): number {
 }
 
 const FIRST_NAMES = [
-  "Rahul", "Sarah", "Alex", "Elena", "Marcus", "Priya", "David", "Amina", "Chen", "Yuki",
+  "Ryan", "Sarah", "Alex", "Elena", "Marcus", "Priya", "David", "Amina", "Chen", "Yuki",
   "Lucas", "Sophia", "Liam", "Olivia", "Noah", "Emma", "Ethan", "Ava", "Mason", "Isabella",
   "Devon", "Chloe", "Arjun", "Zara", "Vikram", "Mei", "Carlos", "Fatima", "Dmitri", "Astrid",
   "Kavita", "Siddharth", "Nia", "Ravi", "Ananya", "Mateo", "Freja", "Kenji", "Tara", "Gabriel",
@@ -21,7 +21,7 @@ const FIRST_NAMES = [
 ];
 
 const LAST_NAMES = [
-  "Garg", "Chen", "Rivera", "Rostova", "Vance", "Mittal", "Kowalski", "Diallo", "Wei", "Tanaka",
+  "Gray", "Chen", "Rivera", "Rostova", "Vance", "Mittal", "Kowalski", "Diallo", "Wei", "Tanaka",
   "Moreau", "Lindqvist", "Patel", "Sharma", "Nakamura", "Dubois", "Alves", "O'Connor", "Novak", "Santos",
   "Kapoor", "Mendoza", "Johansson", "Bauer", "Popov", "Rossi", "Hassan", "Kim", "Zhang", "Natarajan"
 ];
@@ -257,26 +257,26 @@ export async function generateLoadTestData() {
   console.log("Creating/verifying 50 engineering users...");
   const users: Array<any> = [];
 
-  // Always guarantee rahul@bugtracker.io as primary admin
-  const rahul = await prisma.user.upsert({
-    where: { email: "rahul@bugtracker.io" },
+  // Always guarantee alex@bugtracker.io as primary admin
+  const primaryAdmin = await prisma.user.upsert({
+    where: { email: "alex@bugtracker.io" },
     update: {
-      name: "Rahul Garg",
+      name: "Alex Vance",
       password: defaultPassword,
       status: "ACTIVE",
       jobTitle: "Lead Architect & Chief Engineer",
       avatar: AVATARS[0],
     },
     create: {
-      name: "Rahul Garg",
-      email: "rahul@bugtracker.io",
+      name: "Alex Vance",
+      email: "alex@bugtracker.io",
       password: defaultPassword,
       status: "ACTIVE",
       jobTitle: "Lead Architect & Chief Engineer",
       avatar: AVATARS[0],
     },
   });
-  users.push(rahul);
+  users.push(primaryAdmin);
 
   // Generate 49 additional realistic team members
   for (let i = 1; i < 50; i++) {
@@ -308,18 +308,18 @@ export async function generateLoadTestData() {
     });
     orgs[spec.slug] = org;
 
-    // Membership: Rahul is OWNER of CloudDesk and ADMIN/MEMBER in all others
+    // Membership: Alex is OWNER of CloudDesk and ADMIN/MEMBER in all others
     await prisma.membership.upsert({
       where: {
         organizationId_userId: {
           organizationId: org.id,
-          userId: rahul.id,
+          userId: primaryAdmin.id,
         },
       },
       update: { role: spec.slug === "clouddesk" ? "OWNER" : "ADMIN" },
       create: {
         organizationId: org.id,
-        userId: rahul.id,
+        userId: primaryAdmin.id,
         role: spec.slug === "clouddesk" ? "OWNER" : "ADMIN",
       },
     });
@@ -503,8 +503,8 @@ export async function generateLoadTestData() {
           description: `Production repository for ${ps.name}. High-throughput architecture and defect tracking.`,
           category: ps.cat,
           status: "ACTIVE",
-          ownerId: rahul.id,
-          createdById: rahul.id,
+          ownerId: primaryAdmin.id,
+          createdById: primaryAdmin.id,
         },
       });
     } else {
@@ -517,9 +517,9 @@ export async function generateLoadTestData() {
 
     // Add Project Members
     await prisma.projectMember.upsert({
-      where: { projectId_userId: { projectId: project.id, userId: rahul.id } },
+      where: { projectId_userId: { projectId: project.id, userId: primaryAdmin.id } },
       update: { role: "MANAGER" },
-      create: { projectId: project.id, userId: rahul.id, role: "MANAGER" },
+      create: { projectId: project.id, userId: primaryAdmin.id, role: "MANAGER" },
     });
 
     for (let uI = 1; uI <= 6; uI++) {

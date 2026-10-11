@@ -38,7 +38,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
 
       // Session callback
       const sessionResult = authConfig.callbacks?.session?.({
-        session: { user: { id: "", name: "Rahul Garg" }, expires: "2099-01-01" } as any,
+        session: { user: { id: "", name: "Alex Vance" }, expires: "2099-01-01" } as any,
         token: { sub: "usr_123", jobTitle: "Principal Systems Architect" } as any,
       } as any);
 

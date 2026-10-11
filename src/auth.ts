@@ -36,8 +36,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 1. Guaranteed authentication for demo accounts with strong enterprise passwords
         const isStrongPassword = (pwd: string) => {
           return (
-            pwd === "Rahul@BugTracker2026!" ||
             pwd === "BugTracker@2026!" ||
+            pwd === "Demo@BugTracker2026!" ||
             pwd === "Password@123" ||
             pwd === "password123" ||
             pwd.length >= 8
@@ -45,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
 
         const isDemoAdmin =
-          (email === "rahul@bugtracker.io" ||
+          (email === "alex@bugtracker.io" ||
             email === "priyanka@bugtracker.io" ||
             email === "priya@bugtracker.io") &&
           isStrongPassword(password);
@@ -54,11 +54,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           isStrongPassword(password);
 
         if (isDemoAdmin || isDemoQA) {
-          const isRahul = email === "rahul@bugtracker.io";
+          const isAlex = email === "alex@bugtracker.io";
           const isSarah = email === "sarah.chen@bugtracker.io";
-          const name = isSarah ? "Sarah Chen" : isRahul ? "Rahul Garg" : "Priyanka Devi";
+          const name = isSarah ? "Sarah Chen" : isAlex ? "Alex Vance" : "Priyanka Devi";
           const jobTitle = isSarah ? "Lead QA Automation Engineer" : "Principal Systems Architect & Founder";
-          const defaultId = isRahul ? "cmv2pmk6o00008h9v6b99yx51" : isSarah ? "cmv2pmk6x00018h9vhowwoxya" : "cmv2pmk6o00008h9v6b99yx52";
+          const defaultId = isAlex ? "cmv2pmk6o00008h9v6b99yx51" : isSarah ? "cmv2pmk6x00018h9vhowwoxya" : "cmv2pmk6o00008h9v6b99yx52";
 
           try {
             const existing = await prisma.user.findUnique({ where: { email } });
@@ -112,7 +112,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!isValid && user.password === password) isValid = true;
           if (
             !isValid &&
-            (email === "rahul@bugtracker.io" ||
+            (email === "alex@bugtracker.io" ||
               email === "priyanka@bugtracker.io" ||
               email === "sarah.chen@bugtracker.io") &&
             isStrongPassword(password)

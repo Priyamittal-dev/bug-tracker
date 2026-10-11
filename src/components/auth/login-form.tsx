@@ -43,7 +43,7 @@ export function LoginForm() {
     autoSubmit = false,
   ) => {
     setEmail(demoEmail);
-    setPassword("Rahul@BugTracker2026!");
+    setPassword("BugTracker@2026!");
     setActiveDemo(demoRole);
     setError("");
 
@@ -52,7 +52,7 @@ export function LoginForm() {
       try {
         const result = await signIn("credentials", {
           email: demoEmail.toLowerCase().trim(),
-          password: "Rahul@BugTracker2026!",
+          password: "BugTracker@2026!",
           redirect: false,
         });
 
@@ -119,23 +119,23 @@ export function LoginForm() {
             1-Click Demo Testing Accounts
           </span>
           <span className="text-[11px] font-mono text-muted-foreground font-semibold text-primary">
-            pwd: Rahul@BugTracker2026!
+            pwd: BugTracker@2026!
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2 pt-1">
           <button
             type="button"
-            onClick={() => handleQuickFill("rahul@bugtracker.io", "architect")}
+            onClick={() => handleQuickFill("alex@bugtracker.io", "architect")}
             className="text-left p-2 rounded-lg text-xs border transition-all hover:border-primary/50"
           >
             <div className="font-medium text-foreground flex items-center justify-between">
-              <span>Rahul (Lead)</span>
+              <span>Alex (Lead)</span>
               {activeDemo === "architect" && (
                 <CheckCircle2 className="h-3 w-3 text-primary" />
               )}
             </div>
             <div className="text-[10px] text-muted-foreground truncate">
-              rahul@bugtracker.io
+              alex@bugtracker.io
             </div>
           </button>
 

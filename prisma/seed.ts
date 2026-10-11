@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("Seeding Enterprise Multi-Tenant SaaS database...")
 
-  const defaultPassword = await bcrypt.hash("Rahul@BugTracker2026!", 10)
+  const defaultPassword = await bcrypt.hash("BugTracker@2026!", 10)
 
   // Clean existing data
   await prisma.paymentTransaction.deleteMany()
@@ -30,10 +30,10 @@ async function main() {
   await prisma.user.deleteMany()
 
   // 1. Create Core Users
-  const rahul = await prisma.user.create({
+  const alexLead = await prisma.user.create({
     data: {
-      name: "Rahul Garg",
-      email: "rahul@bugtracker.io",
+      name: "Alex Vance",
+      email: "alex@bugtracker.io",
       password: defaultPassword,
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       jobTitle: "Lead Architect & Engineer",
@@ -90,12 +90,12 @@ async function main() {
   // 3. Organization Memberships (RBAC)
   await prisma.membership.createMany({
     data: [
-      { organizationId: cloudOrg.id, userId: rahul.id, role: "OWNER" },
+      { organizationId: cloudOrg.id, userId: alexLead.id, role: "OWNER" },
       { organizationId: cloudOrg.id, userId: sarah.id, role: "ADMIN" },
       { organizationId: cloudOrg.id, userId: alex.id, role: "MEMBER" },
       { organizationId: cloudOrg.id, userId: elena.id, role: "MEMBER" },
-      // Rahul is also a member in FinPay for cross-tenant testing
-      { organizationId: finOrg.id, userId: rahul.id, role: "MEMBER" },
+      // Alex is also a member in FinPay for cross-tenant testing
+      { organizationId: finOrg.id, userId: alexLead.id, role: "MEMBER" },
       { organizationId: finOrg.id, userId: alex.id, role: "OWNER" },
     ],
   })
@@ -119,7 +119,7 @@ async function main() {
 
   await prisma.teamMember.createMany({
     data: [
-      { teamId: platformTeam.id, userId: rahul.id, role: "LEAD" },
+      { teamId: platformTeam.id, userId: alexLead.id, role: "LEAD" },
       { teamId: platformTeam.id, userId: elena.id, role: "MEMBER" },
       { teamId: qaTeam.id, userId: sarah.id, role: "LEAD" },
       { teamId: qaTeam.id, userId: alex.id, role: "MEMBER" },
@@ -152,12 +152,12 @@ async function main() {
   // Project Members
   await prisma.projectMember.createMany({
     data: [
-      { projectId: cloudProject.id, userId: rahul.id, role: "MANAGER" },
+      { projectId: cloudProject.id, userId: alexLead.id, role: "MANAGER" },
       { projectId: cloudProject.id, userId: sarah.id, role: "CONTRIBUTOR" },
       { projectId: cloudProject.id, userId: alex.id, role: "CONTRIBUTOR" },
       { projectId: cloudProject.id, userId: elena.id, role: "CONTRIBUTOR" },
       { projectId: finProject.id, userId: alex.id, role: "MANAGER" },
-      { projectId: finProject.id, userId: rahul.id, role: "CONTRIBUTOR" },
+      { projectId: finProject.id, userId: alexLead.id, role: "CONTRIBUTOR" },
     ],
   })
 
@@ -199,7 +199,7 @@ async function main() {
       dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       projectId: cloudProject.id,
       milestoneId: m1.id,
-      assigneeId: rahul.id,
+      assigneeId: alexLead.id,
       reporterId: sarah.id,
     },
   })
@@ -241,7 +241,7 @@ async function main() {
       dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
       projectId: cloudProject.id,
       milestoneId: m1.id,
-      assigneeId: rahul.id,
+      assigneeId: alexLead.id,
       reporterId: alex.id,
     },
   })
@@ -262,7 +262,7 @@ async function main() {
       dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       projectId: cloudProject.id,
       assigneeId: elena.id,
-      reporterId: rahul.id,
+      reporterId: alexLead.id,
     },
   })
 
@@ -302,7 +302,7 @@ async function main() {
       dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
       projectId: finProject.id,
       milestoneId: m2.id,
-      assigneeId: rahul.id,
+      assigneeId: alexLead.id,
       reporterId: sarah.id,
     },
   })
@@ -334,10 +334,10 @@ async function main() {
       {
         content: "Reproduced on Node.js v20.12. Discovered that the EventEmitter in the WebSocket connection pool wasn't removing listeners on TCP FIN packets. Working on a patch now.",
         issueId: issue1.id,
-        authorId: rahul.id,
+        authorId: alexLead.id,
       },
       {
-        content: "Thanks Rahul! Let me know when the staging build is ready so QA can run the 5,000 virtual connection soak test.",
+        content: "Thanks Alex! Let me know when the staging build is ready so QA can run the 5,000 virtual connection soak test.",
         issueId: issue1.id,
         authorId: sarah.id,
       },

@@ -26,8 +26,8 @@ describe("Unit: Enterprise Strong Password & Credentials Sanitization", () => {
     };
   };
 
-  it("should validate Rahul@BugTracker2026! as a highest-tier strong password", () => {
-    const evaluation = evaluatePasswordStrength("Rahul@BugTracker2026!");
+  it("should validate BugTracker@2026! as a highest-tier strong password", () => {
+    const evaluation = evaluatePasswordStrength("BugTracker@2026!");
     expect(evaluation.isStrong).toBe(true);
     expect(evaluation.score).toBe(6);
     expect(evaluation.checks.length).toBe(true);
@@ -70,14 +70,14 @@ describe("Unit: Enterprise Strong Password & Credentials Sanitization", () => {
     };
 
     it("should normalize email addresses to lowercase and trim spaces", () => {
-      const result = sanitizeCredentials("  Rahul@BugTracker.IO  ", " Rahul@BugTracker2026! ");
-      expect(result.email).toBe("rahul@bugtracker.io");
-      expect(result.password).toBe("Rahul@BugTracker2026!");
+      const result = sanitizeCredentials("  Alex@BugTracker.IO  ", " BugTracker@2026! ");
+      expect(result.email).toBe("alex@bugtracker.io");
+      expect(result.password).toBe("BugTracker@2026!");
     });
 
     it("should intelligently auto-swap fields if user enters email in password box", () => {
-      const swapped = sanitizeCredentials("SuperSecretPass123", "rahul@bugtracker.io");
-      expect(swapped.email).toBe("rahul@bugtracker.io");
+      const swapped = sanitizeCredentials("SuperSecretPass123", "alex@bugtracker.io");
+      expect(swapped.email).toBe("alex@bugtracker.io");
       expect(swapped.password).toBe("supersecretpass123");
     });
   });
@@ -85,7 +85,7 @@ describe("Unit: Enterprise Strong Password & Credentials Sanitization", () => {
   describe("Demo and Enterprise Account Password Verification", () => {
     const isAcceptedEnterprisePassword = (email: string, password: string) => {
       const isDemoAccount =
-        email === "rahul@bugtracker.io" ||
+        email === "alex@bugtracker.io" ||
         email === "priyanka@bugtracker.io" ||
         email === "sarah.chen@bugtracker.io";
 
@@ -93,25 +93,25 @@ describe("Unit: Enterprise Strong Password & Credentials Sanitization", () => {
 
       // Accepted passwords for enterprise demo accounts
       return (
-        password === "Rahul@BugTracker2026!" ||
         password === "BugTracker@2026!" ||
+        password === "Demo@BugTracker2026!" ||
         password === "password123" ||
         (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password))
       );
     };
 
-    it("should authenticate rahul@bugtracker.io with strong password Rahul@BugTracker2026!", () => {
-      expect(isAcceptedEnterprisePassword("rahul@bugtracker.io", "Rahul@BugTracker2026!")).toBe(true);
+    it("should authenticate alex@bugtracker.io with strong password BugTracker@2026!", () => {
+      expect(isAcceptedEnterprisePassword("alex@bugtracker.io", "BugTracker@2026!")).toBe(true);
     });
 
     it("should maintain backward-compatibility with password123 for automation suites", () => {
-      expect(isAcceptedEnterprisePassword("rahul@bugtracker.io", "password123")).toBe(true);
+      expect(isAcceptedEnterprisePassword("alex@bugtracker.io", "password123")).toBe(true);
     });
 
     it("should reject invalid passwords for demo accounts", () => {
-      expect(isAcceptedEnterprisePassword("rahul@bugtracker.io", "wrongpassword")).toBe(false);
-      expect(isAcceptedEnterprisePassword("rahul@bugtracker.io", "")).toBe(false);
-      expect(isAcceptedEnterprisePassword("unknown@user.com", "Rahul@BugTracker2026!")).toBe(false);
+      expect(isAcceptedEnterprisePassword("alex@bugtracker.io", "wrongpassword")).toBe(false);
+      expect(isAcceptedEnterprisePassword("alex@bugtracker.io", "")).toBe(false);
+      expect(isAcceptedEnterprisePassword("unknown@user.com", "BugTracker@2026!")).toBe(false);
     });
   });
 });
