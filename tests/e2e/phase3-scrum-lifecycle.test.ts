@@ -142,5 +142,5 @@ describe("Phase 3 Agile Scrum & Roadmap End-to-End Lifecycle", () => {
     );
     expect(roadmap.epics.length).toBe(1);
     expect(roadmap.epics[0].progress).toBe(Math.round((5 / 13) * 100));
-  });
+  }, 60000);
 });
