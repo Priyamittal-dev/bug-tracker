@@ -2,7 +2,7 @@ import { performance } from "node:perf_hooks";
 
 const target = new URL(
   process.env.LOAD_TEST_URL ??
-    "http://localhost:3000/api/v1/issues?take=50",
+    "http://localhost:3001/api/health",
 );
 const localHosts = new Set(["localhost", "127.0.0.1", "[::1]"]);
 

@@ -64,6 +64,8 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
 
     const publicApiPrefixes = [
       "/api/auth",
+      "/api/health",
+      "/api/v1/health",
       "/api/v1/auth/login",
       "/api/v1/auth/register",
       "/api/v1/auth/forgot-password",
@@ -114,6 +116,8 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
     it("should allow public APIs without authentication", () => {
       expect(evaluateRoute("/api/auth/session", false).action).toBe("ALLOW");
       expect(evaluateRoute("/api/auth/csrf", false).action).toBe("ALLOW");
+      expect(evaluateRoute("/api/health", false).action).toBe("ALLOW");
+      expect(evaluateRoute("/api/v1/health", false).action).toBe("ALLOW");
       expect(evaluateRoute("/api/v1/auth/login", false).action).toBe("ALLOW");
       expect(evaluateRoute("/api/v1/docs", false).action).toBe("ALLOW");
     });

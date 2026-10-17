@@ -21,6 +21,8 @@ const publicContentRoutes = [
 
 const publicApiPrefixes = [
   "/api/auth",
+  "/api/health",
+  "/api/v1/health",
   "/api/webhooks/stripe",
   "/api/v1/auth/login",
   "/api/v1/auth/register",
