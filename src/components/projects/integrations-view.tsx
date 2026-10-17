@@ -51,7 +51,7 @@ export function IntegrationsView() {
               title: "WebSocket session memory leak",
               old_status: "OPEN",
               new_status: "IN_PROGRESS",
-              assignee: "Priyanka Devi",
+              assignee: "Rahul Garg",
               severity: "CRITICAL",
             },
             zoho_sync: "SUCCESS (HTTP 200)",

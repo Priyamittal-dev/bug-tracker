@@ -86,7 +86,7 @@ describe("Unit: Enterprise Strong Password & Credentials Sanitization", () => {
     const isAcceptedEnterprisePassword = (email: string, password: string) => {
       const isDemoAccount =
         email === "alex@bugtracker.io" ||
-        email === "priyanka@bugtracker.io" ||
+        email === "rahul@bugtracker.io" ||
         email === "sarah.chen@bugtracker.io";
 
       if (!isDemoAccount) return false;

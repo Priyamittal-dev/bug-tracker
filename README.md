@@ -1,6 +1,6 @@
 # Enterprise BugTracker & Engineering Management SaaS
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/rahulgarg55/bug-tracker)
 ![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-16.3-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
@@ -12,20 +12,11 @@ Inspired by Jira, Linear, and Zoho BugTracker.
 
 ---
 
-## 🏆 Hackathon Innovation & Recognition
-
-<div align="center">
-  <img src="public/images/priyanka-devi-hackathon-certificate.png" alt="Zapbuild Hackathon Certificate of Appreciation - Priyanka Devi" width="650" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
-  <p><em>Awarded to <strong>Priyanka Devi</strong> for outstanding achievement and exemplary innovation in the <strong>Zapbuild Hackathon</strong> event.</em></p>
-</div>
-
----
-
 ## 🚀 1-Click Production Deployment
 
 ### Option 1: Deploy with Vercel (Fastest & Recommended)
 Deploy instantly to Vercel's global edge network:
-1. Click **[Deploy with Vercel (Priyamittal-dev/bug-tracker)](https://vercel.com/new/clone?repository-url=https://github.com/Priyamittal-dev/bug-tracker)**.
+1. Click **[Deploy with Vercel](https://vercel.com/new/clone?repository-url=https://github.com/rahulgarg55/bug-tracker)**.
 2. Connect your GitHub account and select your repository fork.
 3. Add your environment variables:
    - `DATABASE_URL`: Your PostgreSQL / SQLite connection string.
@@ -125,6 +116,6 @@ For local load testing, first set `DATABASE_URL` to a separate SQLite file named
 
 ## 👤 Author & Maintainer
 
-**Priyanka Devi**
-- **GitHub**: [@Priyamittal-dev](https://github.com/Priyamittal-dev)
-- **Repository**: [Priyamittal-dev/bug-tracker](https://github.com/Priyamittal-dev/bug-tracker)
+**Rahul Garg**
+- **GitHub**: [@rahulgarg55](https://github.com/rahulgarg55)
+- **Repository**: [rahulgarg55/bug-tracker](https://github.com/rahulgarg55/bug-tracker)
