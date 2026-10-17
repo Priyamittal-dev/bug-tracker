@@ -3,6 +3,7 @@ import { BillingConsole } from "@/components/billing/billing-console";
 import { canReadBilling } from "@/lib/rbac";
 import { getTenantContext } from "@/lib/tenant";
 import { ShieldAlert } from "lucide-react";
+import { getStripeEnvironment } from "@/lib/billing/stripe-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function BillingSettingsPage() {
       </p>
     );
   }
+  const stripeEnvironment = getStripeEnvironment();
 
   return (
     <div className="space-y-4">
@@ -37,11 +39,16 @@ export default async function BillingSettingsPage() {
           Billing & payments
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Enterprise subscriptions, PCI-safe payment instruments, tax profiles,
-          and invoice ledger for {overview.organization.name}.
+          Subscription, payment methods, tax profiles, and invoices for{" "}
+          {overview.organization.name}.
         </p>
       </div>
-      <BillingConsole overview={overview} />
+      <BillingConsole
+        overview={overview}
+        stripeMode={stripeEnvironment !== "local"}
+        stripeEnvironment={stripeEnvironment}
+        hasStripeCustomer={Boolean(overview.account.stripeCustomerId)}
+      />
     </div>
   );
 }

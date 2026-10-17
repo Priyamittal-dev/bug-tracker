@@ -277,7 +277,7 @@ export function InvoiceModal({
           <div className="pt-4 border-t border-dashed border-border/80 text-[10px] text-muted-foreground flex items-center justify-between">
             <span className="flex items-center gap-1">
               <ShieldCheck className="h-3 w-3 text-primary" />
-              Verified PCI-DSS Level 1 Sandbox Transaction Receipt
+              Simulated payment transaction receipt
             </span>
             <span>Thank you for using BugTracker!</span>
           </div>

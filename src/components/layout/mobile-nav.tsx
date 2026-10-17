@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Bug, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -8,24 +8,17 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function MobileNav({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
-
-  // Close sheet on route change
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   return (
     <header className="md:hidden flex items-center justify-between px-3 py-2.5 glass-header sticky top-0 z-40 w-full border-b border-border/50">
       <div className="flex items-center gap-2">
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet key={pathname}>
           <SheetTrigger
             render={
               <Button
@@ -47,7 +40,7 @@ export function MobileNav({ children }: { children: React.ReactNode }) {
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/dashboard" className="flex items-center gap-2 group">
           <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-black text-xs shadow-xs">
             ZT
           </div>

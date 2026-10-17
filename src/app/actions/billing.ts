@@ -5,6 +5,12 @@ import { requireTenantContext } from "@/lib/tenant";
 import { canReadBilling } from "@/lib/rbac";
 import { billingService } from "@/services/billing.service";
 import {
+  createStripeCheckoutSession,
+  createStripePortalSession,
+  StripeBillingError,
+} from "@/lib/billing/stripe-provider";
+import { PLAN_CATALOG } from "@/lib/billing/plans";
+import {
   addPaymentMethodSchema,
   cancelSubscriptionSchema,
   changePlanSchema,
@@ -24,6 +30,54 @@ export async function getBillingOverview() {
     return null;
   }
   return billingService.getOverview(tenant.organizationId);
+}
+
+export async function createStripeCheckoutAction(input: unknown) {
+  const tenant = await requireTenantContext();
+  const parsed = changePlanSchema.safeParse(input);
+  if (!parsed.success || parsed.data.planKey === "FREE") {
+    return { ok: false as const, error: "Select a valid paid plan" };
+  }
+  try {
+    const result = await createStripeCheckoutSession({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      role: tenant.role,
+      planKey: parsed.data.planKey,
+      billingInterval: parsed.data.billingInterval,
+      seatQuantity:
+        parsed.data.seatQuantity ??
+        PLAN_CATALOG[parsed.data.planKey].includedSeats,
+    });
+    return { ok: true as const, url: result.url };
+  } catch (error) {
+    return {
+      ok: false as const,
+      error:
+        error instanceof StripeBillingError
+          ? error.message
+          : "Failed to start Stripe Checkout",
+    };
+  }
+}
+
+export async function createStripePortalAction() {
+  const tenant = await requireTenantContext();
+  try {
+    const result = await createStripePortalSession({
+      organizationId: tenant.organizationId,
+      role: tenant.role,
+    });
+    return { ok: true as const, url: result.url };
+  } catch (error) {
+    return {
+      ok: false as const,
+      error:
+        error instanceof StripeBillingError
+          ? error.message
+          : "Failed to open Stripe billing portal",
+    };
+  }
 }
 
 export async function addPaymentMethodAction(input: unknown) {

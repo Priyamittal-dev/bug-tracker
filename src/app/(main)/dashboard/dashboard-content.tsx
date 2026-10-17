@@ -25,7 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { getTenantContext } from "@/lib/tenant";
 import { SpotlightTrigger } from "@/components/spotlight/spotlight-trigger";
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const tenant = await getTenantContext();
   const orgId = tenant?.organizationId;
 

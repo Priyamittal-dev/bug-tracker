@@ -43,7 +43,7 @@ export default async function PricingPage() {
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
               <>
-                <Link href="/">
+                <Link href="/dashboard">
                   <Button variant="ghost" size="sm" className="text-xs font-bold">
                     Dashboard
                   </Button>
@@ -150,7 +150,7 @@ export default async function PricingPage() {
             />
             <FaqCard
               q="Are credit card numbers stored on your servers?"
-              a="Never. All payment methods are tokenized with PCI-DSS Level 1 compliance. We only retain the last 4 digits, brand, and secure cryptographic fingerprint."
+              a="Stripe Checkout and the Stripe billing portal host payment entry. In local sandbox mode, payment outcomes are simulated and must not use real card details."
             />
             <FaqCard
               q="Can I pay via ACH, SEPA, or Invoice PO?"

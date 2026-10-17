@@ -35,6 +35,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  createStripeCheckoutAction,
+  createStripePortalAction,
   addPaymentMethodAction,
   cancelSubscriptionAction,
   changePlanAction,
@@ -67,7 +69,23 @@ function methodLabel(type: string, brand?: string | null) {
   return "Invoice / PO";
 }
 
-export function BillingConsole({ overview }: { overview: Overview }) {
+export function BillingConsole({
+  overview,
+  stripeMode = false,
+  stripeEnvironment = "local",
+  hasStripeCustomer = false,
+}: {
+  overview: Overview;
+  stripeMode?: boolean;
+  stripeEnvironment?:
+    | "local"
+    | "production-disabled"
+    | "unconfigured"
+    | "test"
+    | "live"
+    | "live-unapproved";
+  hasStripeCustomer?: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -87,7 +105,37 @@ export function BillingConsole({ overview }: { overview: Overview }) {
   );
 
   const currentPlan = overview.organization.plan as PlanKey;
+  const stripeAvailable =
+    stripeEnvironment === "test" || stripeEnvironment === "live";
   const isCanceled = overview.subscription?.cancelAtPeriodEnd || false;
+
+  function openStripePortal() {
+    setError(null);
+    startTransition(async () => {
+      const result = await createStripePortalAction();
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      window.location.assign(result.url);
+    });
+  }
+
+  function startStripeCheckout(planKey: PlanKey) {
+    setError(null);
+    startTransition(async () => {
+      const result = await createStripeCheckoutAction({
+        planKey,
+        billingInterval: interval,
+        seatQuantity: customSeats,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      window.location.assign(result.url);
+    });
+  }
 
   function run(
     fn: () => Promise<{ ok: boolean; error?: string }>,
@@ -112,34 +160,78 @@ export function BillingConsole({ overview }: { overview: Overview }) {
 
   return (
     <div className="space-y-6">
-      {/* Sandbox Test Mode Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200">
+      {/* Provider status and safe payment setup */}
+      <div
+        className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border ${
+        stripeAvailable
+          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200"
+          : "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+      }`}
+      >
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
             <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
             <div className="text-xs font-bold flex items-center gap-2">
-              Payment Gateway Sandbox Active
+              {stripeMode
+                ? stripeEnvironment === "test"
+                  ? "Stripe test mode"
+                  : stripeEnvironment === "live"
+                    ? "Stripe live mode"
+                    : stripeEnvironment === "production-disabled"
+                      ? "Billing disabled in production"
+                    : stripeEnvironment === "live-unapproved"
+                      ? "Live Stripe mode blocked"
+                      : "Stripe setup incomplete"
+                : "Payment Gateway Sandbox Active"}
               <Badge
                 variant="outline"
-                className="bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 text-[10px]"
+                className={`text-[10px] ${
+                  stripeAvailable
+                    ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40"
+                    : "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40"
+                }`}
               >
-                TEST MODE
+                {stripeMode
+                  ? stripeEnvironment === "test"
+                    ? "TEST"
+                    : stripeEnvironment === "live"
+                      ? "LIVE"
+                      : stripeEnvironment === "production-disabled"
+                        ? "OFF"
+                      : "SETUP"
+                  : "SIMULATED"}
               </Badge>
             </div>
             <p className="text-[11px] text-amber-800 dark:text-amber-300/80 mt-0.5">
-              Simulated PCI-DSS tokenized payments. Use test cards (e.g. 4242…4242
-              for success, 4000…0002 to test decline).
+              {stripeEnvironment === "test"
+                ? "Stripe-hosted Checkout is in test mode. Test transactions do not charge real cards."
+                : stripeEnvironment === "live"
+                  ? "Live payments are processed through Stripe-hosted pages; card details never enter this application."
+                  : stripeEnvironment === "production-disabled"
+                    ? "Simulated payments are disabled in production until Stripe is configured."
+                  : stripeMode
+                    ? "Stripe billing is unavailable until its server configuration and live-mode approval are valid."
+                : "Local simulated payments only. Never enter a real card number; use the published sandbox test cards."}
             </p>
           </div>
         </div>
-        <AddPaymentMethodDialog
-          pending={pending}
-          onAdd={(payload) =>
-            run(() => addPaymentMethodAction(payload), "Payment method saved")
-          }
-        />
+        {stripeMode ? (
+          hasStripeCustomer && stripeAvailable && (
+            <Button size="sm" disabled={pending} onClick={openStripePortal}>
+              {pending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+              Open Stripe billing portal
+            </Button>
+          )
+        ) : (
+          <AddPaymentMethodDialog
+            pending={pending}
+            onAdd={(payload) =>
+              run(() => addPaymentMethodAction(payload), "Payment method saved")
+            }
+          />
+        )}
       </div>
 
       {(message || error) && (
@@ -222,7 +314,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
           <CreditCard className="h-3.5 w-3.5" />
           Payment Instruments ({overview.paymentMethods.length})
         </button>
-        <button
+        {!stripeMode && <button
           type="button"
           onClick={() => setActiveTab("transactions")}
           className={`px-3 py-2 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
@@ -233,8 +325,8 @@ export function BillingConsole({ overview }: { overview: Overview }) {
         >
           <RotateCcw className="h-3.5 w-3.5" />
           Payment History ({overview.transactions.length})
-        </button>
-        <button
+        </button>}
+        {!stripeMode && <button
           type="button"
           onClick={() => setActiveTab("invoices")}
           className={`px-3 py-2 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
@@ -245,8 +337,8 @@ export function BillingConsole({ overview }: { overview: Overview }) {
         >
           <Receipt className="h-3.5 w-3.5" />
           Invoices & Ledger ({overview.invoices.length})
-        </button>
-        <button
+        </button>}
+        {!stripeMode && <button
           type="button"
           onClick={() => setActiveTab("profile")}
           className={`px-3 py-2 border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
@@ -257,7 +349,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
         >
           <Building2 className="h-3.5 w-3.5" />
           Billing Profile & Tax
-        </button>
+        </button>}
       </div>
 
       {/* TAB 1: Subscription & Plans */}
@@ -370,18 +462,22 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                     <Button
                       size="sm"
                       variant={active ? "outline" : "default"}
-                      disabled={pending || active}
+                      disabled={pending || active || (stripeMode && !stripeAvailable)}
                       className="w-full font-bold"
                       onClick={() =>
-                        run(
-                          () =>
-                            changePlanAction({
-                              planKey: plan.key,
-                              billingInterval: interval,
-                              seatQuantity: customSeats,
-                            }),
-                          `Workspace moved to ${plan.name}`,
-                        )
+                        stripeMode
+                          ? hasStripeCustomer && currentPlan !== "FREE"
+                            ? openStripePortal()
+                            : startStripeCheckout(plan.key)
+                          : run(
+                              () =>
+                                changePlanAction({
+                                  planKey: plan.key,
+                                  billingInterval: interval,
+                                  seatQuantity: customSeats,
+                                }),
+                              `Workspace moved to ${plan.name}`,
+                            )
                       }
                     >
                       {pending ? (
@@ -389,7 +485,13 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                       ) : null}
                       {active
                         ? "Active Plan"
-                        : plan.key === "FREE"
+                        : stripeEnvironment === "production-disabled"
+                          ? "Billing disabled"
+                          : stripeMode && currentPlan !== "FREE"
+                          ? "Manage in Stripe"
+                          : stripeMode
+                            ? `Continue to Stripe for ${plan.name}`
+                            : plan.key === "FREE"
                           ? "Downgrade to Free"
                           : `Upgrade to ${plan.name}`}
                     </Button>
@@ -400,7 +502,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
           </div>
 
           {/* Cancellation and Reactivation controls */}
-          {currentPlan !== "FREE" && (
+          {currentPlan !== "FREE" && !stripeMode && (
             <div className="p-4 rounded-xl border border-border bg-card/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h4 className="text-xs font-bold text-foreground">
@@ -459,20 +561,41 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                 Payment Instruments
               </h3>
               <p className="text-xs text-muted-foreground">
-                Cards and bank accounts are tokenized with PCI-DSS safety. Raw PAN
-                and CVC are never stored.
+                {stripeEnvironment === "production-disabled"
+                  ? "Billing payments are disabled in production until Stripe is configured."
+                  : stripeMode
+                  ? "Payment methods are securely managed on Stripe-hosted pages."
+                  : "Sandbox payment instruments are simulated and must never use real card details."}
               </p>
             </div>
-            <AddPaymentMethodDialog
-              pending={pending}
-              onAdd={(payload) =>
-                run(() => addPaymentMethodAction(payload), "Payment method saved")
-              }
-            />
+            {stripeMode ? (
+              <Button
+                size="sm"
+                onClick={openStripePortal}
+                disabled={pending || !hasStripeCustomer || !stripeAvailable}
+              >
+                Manage payment methods in Stripe
+              </Button>
+            ) : (
+              <AddPaymentMethodDialog
+                pending={pending}
+                onAdd={(payload) =>
+                  run(() => addPaymentMethodAction(payload), "Payment method saved")
+                }
+              />
+            )}
           </div>
 
           <div className="space-y-2">
-            {overview.paymentMethods.length === 0 && (
+            {stripeMode ? (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
+                {stripeEnvironment === "production-disabled"
+                  ? "Billing payments are disabled in production until Stripe is configured."
+                  : hasStripeCustomer
+                  ? "Payment methods are securely managed on Stripe-hosted pages."
+                  : "Choose a paid plan to securely add a payment method through Stripe Checkout."}
+              </div>
+            ) : overview.paymentMethods.length === 0 && (
               <div className="rounded-xl border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
                 No payment instruments on file. Add a sandbox card, ACH, or SEPA
                 account to activate paid features.
@@ -781,7 +904,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                       </Button>
                       {inv.status !== "PAID" && inv.status !== "VOID" && (
                         <>
-                          <Button
+                          {!stripeMode && <Button
                             size="xs"
                             disabled={pending}
                             onClick={() =>
@@ -792,8 +915,8 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                             }
                           >
                             Pay now
-                          </Button>
-                          <Button
+                          </Button>}
+                          {!stripeMode && <Button
                             size="xs"
                             variant="destructive"
                             disabled={pending}
@@ -809,7 +932,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
                             }
                           >
                             Void
-                          </Button>
+                          </Button>}
                         </>
                       )}
                     </td>
@@ -836,7 +959,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
       )}
 
       {/* Printable Invoice Modal Component */}
-      <InvoiceModal
+      {!stripeMode && <InvoiceModal
         invoice={selectedInvoice}
         companyName={overview.account.companyName || overview.organization.name}
         billingEmail={overview.account.billingEmail}
@@ -849,7 +972,7 @@ export function BillingConsole({ overview }: { overview: Overview }) {
           run(() => payInvoiceAction(invId), "Invoice paid successfully");
           setSelectedInvoice(null);
         }}
-      />
+      />}
     </div>
   );
 }

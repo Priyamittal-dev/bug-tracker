@@ -40,7 +40,7 @@ export async function Sidebar() {
       {/* Workspace / Organization Switcher Header */}
       <div className="p-3 border-b space-y-2">
         <div className="flex items-center justify-between px-1 pr-7 md:pr-1">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/dashboard" className="flex items-center gap-2 group">
             <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-black text-xs shadow-md shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105">
               ZT
             </div>
@@ -69,7 +69,7 @@ export async function Sidebar() {
             Workspace
           </div>
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-muted/80 text-foreground transition-all duration-200 hover:shadow-xs group"
           >
             <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />

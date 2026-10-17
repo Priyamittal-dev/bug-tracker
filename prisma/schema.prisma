@@ -8,6 +8,12 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
+
+
+
+
+
+
 // -----------------------------------------------------------------------------
 // 1. Identity & Authentication (Auth.js / NextAuth v5)
 // -----------------------------------------------------------------------------
@@ -834,6 +840,7 @@ model BillingAccount {
   collectionMethod  String  @default("CHARGE_AUTOMATICALLY") // CHARGE_AUTOMATICALLY, SEND_INVOICE
   poNumber          String?
   netTermsDays      Int     @default(30)
+  stripeCustomerId  String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -862,6 +869,9 @@ model Subscription {
   currentPeriodEnd   DateTime
   cancelAtPeriodEnd  Boolean  @default(false)
   canceledAt         DateTime?
+  stripeSubscriptionId String? @unique
+  stripePriceId       String?
+  stripeLastEventCreatedAt Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -908,6 +918,8 @@ model Invoice {
   paymentMethod    PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
 
   number          String @unique
+  stripeInvoiceId String? @unique
+  stripeLastEventCreatedAt Int?
   status          String @default("OPEN") // DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE
   currency        String @default("USD")
   subtotalCents   Int
@@ -948,6 +960,9 @@ model PaymentTransaction {
   type                String   @default("CHARGE") // CHARGE, REFUND, VERIFICATION
   gateway             String   @default("STRIPE_SANDBOX")
   gatewayTransactionId String
+  stripeInvoiceId      String?  @unique
+  stripePaymentIntentId String?  @unique
+  stripeLastEventCreatedAt Int?
   gatewayResponseCode String?
   failureReason       String?
   refundedAmountCents Int      @default(0)
@@ -964,4 +979,19 @@ model PaymentTransaction {
   @@index([paymentMethodId])
   @@index([status])
   @@index([gatewayTransactionId])
+}
+
+model StripeWebhookEvent {
+  id          String   @id @default(cuid())
+  stripeEventId String @unique
+  eventType   String
+  status      String   @default("PROCESSING")
+  attempts    Int      @default(1)
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+  lastError   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, receivedAt])
 }

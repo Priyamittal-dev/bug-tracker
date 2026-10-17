@@ -246,6 +246,25 @@ const COMMENT_SNIPPETS = [
 ];
 
 export async function generateLoadTestData() {
+  const databaseUrl = process.env.DATABASE_URL ?? "";
+  const databaseTarget = databaseUrl.startsWith("file:")
+    ? databaseUrl.slice("file:".length).split("?")[0]
+    : databaseUrl.slice(databaseUrl.lastIndexOf("@") + 1).split("?")[0];
+  const isIsolatedDatabase =
+    /(?:^|[\\/_.-])(?:load[-_]?test|staging|test)(?:[\\/_.-]|$)/i.test(
+      databaseTarget,
+    );
+  const userCount = Number(process.env.LOAD_TEST_USER_COUNT ?? 50);
+
+  if (process.env.NODE_ENV === "production" || !isIsolatedDatabase) {
+    throw new Error(
+      "Load-test data requires a non-production database named for test, staging, or load testing.",
+    );
+  }
+  if (!Number.isSafeInteger(userCount) || userCount < 50 || userCount > 2000) {
+    throw new Error("LOAD_TEST_USER_COUNT must be an integer between 50 and 2000.");
+  }
+
   const startTime = Date.now();
   console.log("==========================================================");
   console.log("⚡ STARTING HIGH-VOLUME DUMMY DATA GENERATION FOR LOAD TESTING");
@@ -253,8 +272,8 @@ export async function generateLoadTestData() {
 
   const defaultPassword = await bcrypt.hash("password123", 10);
 
-  // 1. Ensure / Create 50 Core Users
-  console.log("Creating/verifying 50 engineering users...");
+  // 1. Ensure / Create the requested number of core users
+  console.log(`Creating/verifying ${userCount} engineering users...`);
   const users: Array<any> = [];
 
   // Always guarantee alex@bugtracker.io as primary admin
@@ -278,8 +297,8 @@ export async function generateLoadTestData() {
   });
   users.push(primaryAdmin);
 
-  // Generate 49 additional realistic team members
-  for (let i = 1; i < 50; i++) {
+  // Generate the remaining realistic team members
+  for (let i = 1; i < userCount; i++) {
     const fn = FIRST_NAMES[i % FIRST_NAMES.length];
     const ln = LAST_NAMES[(i * 3) % LAST_NAMES.length];
     const email = `${fn.toLowerCase()}.${ln.toLowerCase()}${i > 25 ? i : ""}@bugtracker.io`;
@@ -294,7 +313,7 @@ export async function generateLoadTestData() {
     });
     users.push(u);
   }
-  console.log(`✓ 50 Users prepared (All have password: "password123")`);
+  console.log(`✓ ${userCount} users prepared for isolated load testing`);
 
   // 2. Create 10 Enterprise Organizations
   console.log("Creating 10 enterprise organizations & billing accounts...");

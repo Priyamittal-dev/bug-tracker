@@ -12,13 +12,9 @@ import {
   Settings,
   Code2,
   Plus,
-  Moon,
-  Sun,
   X,
   ArrowRight,
   ShieldAlert,
-  Clock,
-  Layers,
   Terminal,
 } from "lucide-react";
 
@@ -43,9 +39,20 @@ export function SpotlightDialog() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const inputRef = useRef<HTMLInputElement>(null);
   const [issuesList, setIssuesList] = useState<any[]>([]);
+  const [hasLoadedIssues, setHasLoadedIssues] = useState(false);
+  const openSpotlight = useCallback(() => {
+    setSelectedIndex(0);
+    setIsOpen(true);
+  }, []);
+  const closeSpotlight = useCallback(() => {
+    setIsOpen(false);
+    setQuery("");
+  }, []);
 
-  // Fetch real issues for instant searching
+  // Fetch issues only when the user first opens search.
   useEffect(() => {
+    if (!isOpen || hasLoadedIssues) return;
+
     let isMounted = true;
     async function loadIssues() {
       try {
@@ -54,6 +61,7 @@ export function SpotlightDialog() {
           const data = await res.json();
           if (isMounted && data.success && Array.isArray(data.data)) {
             setIssuesList(data.data);
+            setHasLoadedIssues(true);
           }
         }
       } catch {
@@ -64,40 +72,38 @@ export function SpotlightDialog() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [hasLoadedIssues, isOpen]);
 
   // Keyboard shortcut listener for Cmd+K / Ctrl+K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (isOpen) closeSpotlight();
+        else openSpotlight();
       } else if (e.key === "Escape" && isOpen) {
         e.preventDefault();
-        setIsOpen(false);
+        closeSpotlight();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, openSpotlight, closeSpotlight]);
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
-      setSelectedIndex(0);
-    } else {
-      setQuery("");
     }
   }, [isOpen]);
 
   // Custom Event listener for open-spotlight
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = () => openSpotlight();
     window.addEventListener("open-spotlight", handleOpen);
     return () => window.removeEventListener("open-spotlight", handleOpen);
-  }, []);
+  }, [openSpotlight]);
 
   // Predefined navigation and quick action items
   const baseItems: SpotlightItem[] = useMemo(
@@ -109,7 +115,7 @@ export function SpotlightDialog() {
         subtitle: "Workspace metrics, defect resolution, and sprint health",
         category: "navigation",
         icon: Home,
-        url: "/",
+        url: "/dashboard",
         keywords: ["home", "stats", "overview", "kpi"],
       },
       {
@@ -292,14 +298,14 @@ export function SpotlightDialog() {
   // Handle item selection
   const handleSelect = useCallback(
     (item: SpotlightItem) => {
-      setIsOpen(false);
+      closeSpotlight();
       if (item.action) {
         item.action();
       } else if (item.url) {
         router.push(item.url);
       }
     },
-    [router]
+    [closeSpotlight, router]
   );
 
   // Arrow key navigation

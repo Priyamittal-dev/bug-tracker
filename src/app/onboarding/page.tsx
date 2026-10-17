@@ -45,15 +45,15 @@ export default function OnboardingPage() {
       const data = await res.json();
       if (!res.ok) {
         // If error (or if already has an org), redirect to dashboard
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
         return;
       }
 
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch {
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } finally {
       setIsQuickLaunching(false);
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
           body: JSON.stringify({ email: inviteEmail, role: "DEVELOPER" }),
         });
       }
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       setError("Failed to dispatch invitation.");
@@ -343,7 +343,7 @@ export default function OnboardingPage() {
                   variant="outline"
                   className="flex-1 h-10 text-xs font-semibold"
                   onClick={() => {
-                    router.push("/");
+                    router.push("/dashboard");
                     router.refresh();
                   }}
                 >

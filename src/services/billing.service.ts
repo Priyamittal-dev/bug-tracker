@@ -35,6 +35,25 @@ function assertBillingManage(role: string) {
   }
 }
 
+function assertSandboxPaymentsEnabled() {
+  if (process.env.BILLING_PROVIDER === "stripe") {
+    const error: any = new Error(
+      "Use Stripe-hosted Checkout and the billing portal for payment operations",
+    );
+    error.code = "STRIPE_HOSTED_FLOW_REQUIRED";
+    error.status = 409;
+    throw error;
+  }
+  if (process.env.NODE_ENV === "production") {
+    const error: any = new Error(
+      "Local simulated billing is disabled in production; configure Stripe billing",
+    );
+    error.code = "BILLING_PROVIDER_REQUIRED";
+    error.status = 503;
+    throw error;
+  }
+}
+
 function periodEnd(interval: BillingInterval, from = new Date()) {
   const end = new Date(from);
   if (interval === "YEARLY") {
@@ -265,6 +284,7 @@ export class BillingService {
     actorUserId: string,
     input: AddPaymentMethodInput,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const account = await this.ensureAccount(
       organizationId,
@@ -390,6 +410,7 @@ export class BillingService {
     role: string,
     paymentMethodId: string,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const method = await prisma.paymentMethod.findFirst({
       where: { id: paymentMethodId, organizationId, status: "ACTIVE" },
@@ -421,6 +442,7 @@ export class BillingService {
     actorUserId: string,
     paymentMethodId: string,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const method = await prisma.paymentMethod.findFirst({
       where: { id: paymentMethodId, organizationId, status: { not: "REMOVED" } },
@@ -493,6 +515,7 @@ export class BillingService {
     actorUserId: string,
     input: ChangePlanInput,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const overview = await this.getOverview(organizationId);
     const planKey = input.planKey;
@@ -722,6 +745,7 @@ export class BillingService {
     invoiceId: string,
     paymentMethodId?: string,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const invoice = await prisma.invoice.findFirst({
       where: { id: invoiceId, organizationId },
@@ -828,6 +852,7 @@ export class BillingService {
     actorUserId: string,
     input: RefundTransactionInput,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const tx = await prisma.paymentTransaction.findFirst({
       where: { id: input.transactionId, organizationId },
@@ -953,6 +978,7 @@ export class BillingService {
     actorUserId: string,
     input: VoidInvoiceInput,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const invoice = await prisma.invoice.findFirst({
       where: { id: input.invoiceId, organizationId },
@@ -1048,6 +1074,7 @@ export class BillingService {
     actorUserId: string,
     input: CancelSubscriptionInput,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const sub = await prisma.subscription.findUnique({
       where: { organizationId },
@@ -1107,6 +1134,7 @@ export class BillingService {
     role: string,
     actorUserId: string,
   ) {
+    assertSandboxPaymentsEnabled();
     assertBillingManage(role);
     const sub = await prisma.subscription.findUnique({
       where: { organizationId },

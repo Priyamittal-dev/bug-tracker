@@ -42,7 +42,7 @@ export function OrgSwitcher({ organizations, activeOrgId }: OrgSwitcherProps) {
 
       if (res.ok) {
         setIsOpen(false);
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {

@@ -4,6 +4,24 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Refusing to seed fixture data in production.");
+  }
+
+  if (process.env.ALLOW_DESTRUCTIVE_SEED !== "true") {
+    throw new Error(
+      "This seed deletes existing data. Set ALLOW_DESTRUCTIVE_SEED=true only for a disposable development database.",
+    );
+  }
+
+  const databaseUrl = process.env.DATABASE_URL ?? "";
+  const databaseName = databaseUrl.split(/[/?#]/).filter(Boolean).pop() ?? "";
+  if (!/(?:^|[-_.])(dev|development|test|testing|local|seed|staging|loadtest)(?:[-_.]|$)/i.test(databaseName)) {
+    throw new Error(
+      "Refusing to seed a database without a dev/test/local/staging/loadtest name.",
+    );
+  }
+
   console.log("Seeding Enterprise Multi-Tenant SaaS database...")
 
   const defaultPassword = await bcrypt.hash("BugTracker@2026!", 10)

@@ -15,10 +15,13 @@ const publicContentRoutes = [
   "/docs",
   "/api-docs",
   "/logout",
+  "/privacy",
+  "/terms",
 ];
 
 const publicApiPrefixes = [
   "/api/auth",
+  "/api/webhooks/stripe",
   "/api/v1/auth/login",
   "/api/v1/auth/register",
   "/api/v1/auth/forgot-password",
@@ -27,7 +30,7 @@ const publicApiPrefixes = [
   "/api/v1/docs",
 ];
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 
@@ -35,6 +38,7 @@ export default auth((req) => {
   const isPublicContent = publicContentRoutes.some((route) =>
     pathname.startsWith(route)
   );
+  const isPublicPage = isPublicContent;
   const isPublicApi = publicApiPrefixes.some((prefix) =>
     pathname.startsWith(prefix)
   );
@@ -45,7 +49,7 @@ export default auth((req) => {
   }
 
   // Handle unauthenticated requests to protected pages
-  if (!isLoggedIn && !isAuthPage && !isPublicContent) {
+  if (!isLoggedIn && !isAuthPage && !isPublicPage) {
     // Return 401 JSON for protected API routes
     if (pathname.startsWith("/api/")) {
       return Response.json(
@@ -70,7 +74,7 @@ export default auth((req) => {
   // Redirect authenticated users from guest auth pages (/login, /register) to dashboard
   if (isLoggedIn && isAuthPage) {
     const rawCallback = req.nextUrl.searchParams.get("callbackUrl");
-    let target = "/";
+    let target = "/dashboard";
     if (
       rawCallback &&
       rawCallback.startsWith("/") &&

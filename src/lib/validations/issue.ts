@@ -55,9 +55,9 @@ export const relationshipTypeEnum = z.enum([
 export const createIssueSchema = z.object({
   title: z
     .string()
+    .trim()
     .min(2, "Title must be at least 2 characters")
-    .max(255)
-    .trim(),
+    .max(255),
   description: z.string().max(30000).optional(),
   type: issueTypeEnum.default("TASK").optional(),
   priority: issuePriorityEnum.default("MEDIUM").optional(),
@@ -96,7 +96,7 @@ export const createIssueSchema = z.object({
 export type CreateIssueInput = z.infer<typeof createIssueSchema>;
 
 export const updateIssueSchema = z.object({
-  title: z.string().min(2).max(255).trim().optional(),
+  title: z.string().trim().min(2).max(255).optional(),
   description: z.string().max(30000).optional(),
   type: issueTypeEnum.optional(),
   status: issueStatusEnum.optional(),
@@ -142,9 +142,9 @@ export type UpdateIssueStatusInput = z.infer<typeof updateIssueStatusSchema>;
 export const addCommentSchema = z.object({
   content: z
     .string()
+    .trim()
     .min(1, "Comment content cannot be empty")
-    .max(10000)
-    .trim(),
+    .max(10000),
 });
 
 export type AddCommentInput = z.infer<typeof addCommentSchema>;
@@ -157,7 +157,7 @@ export const addRelationshipSchema = z.object({
 export type AddRelationshipInput = z.infer<typeof addRelationshipSchema>;
 
 export const createLabelSchema = z.object({
-  name: z.string().min(1, "Label name is required").max(50).trim(),
+  name: z.string().trim().min(1, "Label name is required").max(50),
   color: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid 6-character hex code")

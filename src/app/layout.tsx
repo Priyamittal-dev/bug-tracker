@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { QueryProvider } from "@/components/query-provider";
+import { ComplianceBanner } from "@/components/compliance-banner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,7 +27,8 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen w-full bg-background text-foreground antialiased`}
       >
         <ThemeProvider defaultTheme="system" storageKey="bugtracker-theme">
-          <QueryProvider>{children}</QueryProvider>
+          {children}
+          <ComplianceBanner />
         </ThemeProvider>
       </body>
     </html>

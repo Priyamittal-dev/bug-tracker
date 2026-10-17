@@ -10,12 +10,11 @@ const googleSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE
 if (googleId && googleSecret && !googleId.includes("your-")) {
   providers.push(
     Google({
-      clientId: googleId,
-      clientSecret: googleSecret,
-      checks: ["pkce"],
-      allowDangerousEmailAccountLinking: true,
-    })
-  );
+        clientId: googleId,
+        clientSecret: googleSecret,
+        checks: ["pkce"],
+      })
+    );
 }
 
 const githubId = process.env.GITHUB_ID || process.env.AUTH_GITHUB_ID;
@@ -41,10 +40,15 @@ providers.push(
   })
 );
 
+const developmentOnlySecret =
+  process.env.NODE_ENV === "production"
+    ? undefined
+    : "development-only-not-for-production";
+
 export const AUTH_SECRET =
   process.env.AUTH_SECRET ||
   process.env.NEXTAUTH_SECRET ||
-  "f6869bca7284-enterprise-secret-bugtracker";
+  developmentOnlySecret;
 
 export default {
   trustHost: true,
@@ -70,4 +74,3 @@ export default {
     signIn: "/login",
   },
 } satisfies NextAuthConfig;
-

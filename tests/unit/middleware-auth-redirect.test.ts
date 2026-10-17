@@ -6,7 +6,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
     it("should have a non-empty, securely configured AUTH_SECRET", () => {
       expect(AUTH_SECRET).toBeDefined();
       expect(typeof AUTH_SECRET).toBe("string");
-      expect(AUTH_SECRET.length).toBeGreaterThanOrEqual(32);
+      expect(AUTH_SECRET?.length ?? 0).toBeGreaterThanOrEqual(32);
     });
 
     it("should enforce JWT session strategy across Edge and Node runtimes", () => {
@@ -85,7 +85,9 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
         return { action: "ALLOW", reason: "public-api" };
       }
 
-      if (!isLoggedIn && !isAuthPage && !isPublicContent) {
+      const isPublicPage = pathname === "/" || isPublicContent;
+
+      if (!isLoggedIn && !isAuthPage && !isPublicPage) {
         if (pathname.startsWith("/api/")) {
           return { action: "REJECT_401", status: 401 };
         }
@@ -94,7 +96,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
       }
 
       if (isLoggedIn && isAuthPage) {
-        let target = "/";
+        let target = "/dashboard";
         if (
           callbackUrlQuery &&
           callbackUrlQuery.startsWith("/") &&
@@ -117,6 +119,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
     });
 
     it("should allow public content pages without authentication", () => {
+      expect(evaluateRoute("/", false).action).toBe("ALLOW");
       expect(evaluateRoute("/pricing", false).action).toBe("ALLOW");
       expect(evaluateRoute("/docs", false).action).toBe("ALLOW");
       expect(evaluateRoute("/api-docs", false).action).toBe("ALLOW");
@@ -141,10 +144,6 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
     });
 
     it("should redirect unauthenticated users on protected pages to login with callbackUrl", () => {
-      const rootRes = evaluateRoute("/", false);
-      expect(rootRes.action).toBe("REDIRECT_LOGIN");
-      expect(rootRes.target).toBe("/login?callbackUrl=%2F");
-
       const issuesRes = evaluateRoute("/issues", false);
       expect(issuesRes.action).toBe("REDIRECT_LOGIN");
       expect(issuesRes.target).toBe("/login?callbackUrl=%2Fissues");
@@ -157,7 +156,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
     it("should redirect authenticated users visiting /login to dashboard or safe callbackUrl", () => {
       const defaultLogin = evaluateRoute("/login", true, null);
       expect(defaultLogin.action).toBe("REDIRECT_DASHBOARD");
-      expect(defaultLogin.target).toBe("/");
+      expect(defaultLogin.target).toBe("/dashboard");
 
       const withSafeCallback = evaluateRoute("/login", true, "/projects");
       expect(withSafeCallback.action).toBe("REDIRECT_DASHBOARD");
@@ -166,7 +165,7 @@ describe("Unit: NextAuth & Edge Middleware Route Guarding", () => {
       // Prevent redirect loop if callbackUrl points back to /login
       const withUnsafeCallback = evaluateRoute("/login", true, "/login?nested=true");
       expect(withUnsafeCallback.action).toBe("REDIRECT_DASHBOARD");
-      expect(withUnsafeCallback.target).toBe("/");
+      expect(withUnsafeCallback.target).toBe("/dashboard");
     });
 
     it("should allow authenticated users to browse protected pages normally", () => {
